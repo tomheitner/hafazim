@@ -4,35 +4,37 @@ import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
 
-export default function PlayerCard({turn, nextTurn}) {
+export default function PlayerSection({player, boardState, changeTurn}) {
+
+    
     return (
-        <View style={[styles.mainContainer, (turn === 0) && globalStyles.chosenOutline]}>
+        <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline]}>
 
             <View style={styles.topRow}>
                 <View style={styles.betContainer}>
-                    <Text>Bet: 300$</Text>
+                    <Text>Bet: {player['betSize']}$</Text>
                 </View>
             </View>
 
             <View style={styles.midRow}>
-                <HefezKlaf/>
-                <HefezKlaf />
+                <HefezKlaf title={'klafs' in player ? player['klafs'][0] : null}/>
+                <HefezKlaf title={'klafs' in player ? player['klafs'][1] : null}/>
             </View>
 
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={globalStyles.genericButton} onPress={nextTurn}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={changeTurn}>
                     <Text>
                         Call
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={() => console.log(player)}>
                     <Text>
                         Fold
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={() => {console.log(boardState.turnNumber)}}>
                     <Text>
                         Raise
                     </Text>
@@ -45,7 +47,6 @@ export default function PlayerCard({turn, nextTurn}) {
 const styles = StyleSheet.create({
     mainContainer: {
       width: '100%',
-      height: '35%',
       paddingVertical: 10,
       paddingHorizontal: 20,
       backgroundColor: COLORS.base500,

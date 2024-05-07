@@ -4,9 +4,9 @@ import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
 
-export default function OtherPlayerCard({turn, turnNumber}) {
+export default function OtherPlayerSection({player, boardState}) {
     return (
-        <View style={[styles.mainContainer, turn === turnNumber && globalStyles.chosenOutline]}>
+        <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline]}>
 
             <View style={styles.midRow}>
                 <HefezKlaf moreTextStyles={{fontSize: 15}}/>
@@ -15,7 +15,7 @@ export default function OtherPlayerCard({turn, turnNumber}) {
 
             <View style={styles.bottomRow}>
                 <View style={styles.betContainer}>
-                    <Text>Bet: 300$</Text>
+                    <Text>Bet: {player['betSize']}$</Text>
                 </View>
             </View>
 
@@ -26,7 +26,6 @@ export default function OtherPlayerCard({turn, turnNumber}) {
 const styles = StyleSheet.create({
     mainContainer: {
       width: '40%',
-      height: '40%',
       paddingVertical: 10,
       paddingHorizontal: 5,
       backgroundColor: COLORS.base500,

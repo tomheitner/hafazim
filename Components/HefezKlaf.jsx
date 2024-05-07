@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../consts';
 
-export default function HefezKlaf({moreTextStyles, moreCardStyles}) {
+export default function HefezKlaf({moreTextStyles, moreCardStyles, title=null}) {
     return (
         <View style={[styles.container, moreCardStyles]}>
             <Text style={[{fontSize: 25}, moreTextStyles]}>
-                חפץ
+                {title === null ? 'חפץ' : title}
             </Text>
         </View>
     )

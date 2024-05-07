@@ -4,7 +4,7 @@ import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
 
-export default function TableCard() {
+export default function TableSection({boardState}) {
     return (
         <View style={[styles.mainContainer]}>            
 
@@ -18,7 +18,7 @@ export default function TableCard() {
 
             <View style={styles.bottomRow}>
                 <View style={styles.potContainer}>
-                    <Text>Pot: 900$</Text>
+                    <Text>Pot: {boardState['potSize']}$</Text>
                 </View>
             </View>
 
@@ -30,7 +30,7 @@ export default function TableCard() {
 const styles = StyleSheet.create({
     mainContainer: {
       width: '100%',
-      height: '35%',
+      height: '75%',
       paddingVertical: 10,
       paddingHorizontal: 20,
       backgroundColor: COLORS.base500,
