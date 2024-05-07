@@ -15,7 +15,7 @@ export default function PlayerCard({turn, nextTurn}) {
             </View>
 
             <View style={styles.midRow}>
-                <HefezKlaf />
+                <HefezKlaf/>
                 <HefezKlaf />
             </View>
 

@@ -3,6 +3,7 @@ import PlayerCard from '../Components/PlayerCard';
 import { COLORS } from '../consts';
 import OtherPlayerCard from '../Components/OtherPlayerCard';
 import { useState } from 'react';
+import TableCard from '../Components/TableCard';
 
 
 export default function MainScreen() {
@@ -24,12 +25,9 @@ export default function MainScreen() {
                 <OtherPlayerCard turnNumber={2} turn={turn}/>
             </View>
 
-            <View>
-                
-            </View>
+            <TableCard />
             
             <PlayerCard turn={turn} nextTurn={nextTurn}/>
-            <View />
         </View>
     )
 }
@@ -38,7 +36,8 @@ const styles = StyleSheet.create({
     mainContainer: {
       flex: 1,
       backgroundColor: COLORS.base300,
-      alignItems: 'center'
+      alignItems: 'center',
+      justifyContent: 'space-between'
     },
     topRow: {
         flexDirection: 'row',
