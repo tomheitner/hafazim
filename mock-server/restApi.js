@@ -25,6 +25,7 @@ function initGame() {
             turnNumber: 0, // whos turn it is
             roundNumber: 0, // the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
             tableKlafs: [null, null, null, null, null],
+            minBetSize: 5
         },
         
         players: { // key is the player number for each player
@@ -55,8 +56,14 @@ function handleNextRound(input) {
 
     const data = JSON.parse(input);
 
+    data['boardState']['potSize'] = data['boardState']['potSize'] + data['betAmount'];  // update pot size
+    if (data['betAmount'] > data['boardState']['minBetSize']) data['boardState']['minBetSize'] = data['betAmount']; // update min bet size
+
     //calc new turn number
-    if (data['boardState']['turnNumber'] > 1) data['boardState']['turnNumber'] = 0;
+    if (data['boardState']['turnNumber'] > 1) {
+        data['boardState']['turnNumber'] = 0;
+        data['boardState']['minBetSize'] = 0;
+    } 
     else data['boardState']['turnNumber'] = data['boardState']['turnNumber'] + 1;
 
     // calc round number
@@ -78,8 +85,7 @@ function handleNextRound(input) {
             data.boardState.tableKlafs = tableKlafs;
         }
     }
-
-    data['boardState']['potSize'] = data['boardState']['potSize'] + data['betAmount']  // update pot size
+    
 
     // update player state
     data['player']['remainingChips'] = data['player']['remainingChips'] - data['betAmount'];

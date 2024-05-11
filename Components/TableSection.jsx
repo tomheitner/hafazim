@@ -29,6 +29,11 @@ export default function TableSection({boardState, changeTurn}) {
                 <TouchableOpacity style={globalStyles.genericButton} onPress={handleNextTurn}>
                     <Text>▶️</Text>
                 </TouchableOpacity>
+
+                <View style={{justifyContent: 'center'}}>
+                    <Text>Bet Size: {boardState['minBetSize']} $</Text>
+                </View>
+
                 <View style={styles.potContainer}>
                     <Text>Pot: {boardState['potSize']}$</Text>
                 </View>
