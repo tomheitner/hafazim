@@ -15,4 +15,8 @@ export const globalStyles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'red'
     },
+    disabled: {
+        opacity: 0.5,
+        borderColor: 'gray'
+    }
 })

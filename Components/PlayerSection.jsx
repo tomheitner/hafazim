@@ -7,12 +7,17 @@ import { callApi } from '../mock-server/callApi';
 
 export default function PlayerSection({player, boardState, changeTurn}) {
 
+
+    disabled = (boardState['turnNumber'] !== player['playerNumber']);
+    console.log(boardState['turnNumber']);
+    console.log(player['turnNumber']);
+
     function handleBet(e) {
         console.log(e.nativeEvent.text);
     }
 
     return (
-        <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline]}>
+        <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline, disabled && globalStyles.disabled]}>
 
             <View style={styles.topRow}>
                 <View style={styles.betContainer}>
@@ -26,25 +31,25 @@ export default function PlayerSection({player, boardState, changeTurn}) {
             </View>
 
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={globalStyles.genericButton} onPress={() => changeTurn(50)}>
+                <TouchableOpacity style={[globalStyles.genericButton]} onPress={() => changeTurn(50)} disabled={disabled}>
                     <Text>
                         Call
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={() => console.log(player)}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={() => console.log(player)} disabled={disabled}>
                     <Text>
                         Fold
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={() => {console.log(boardState.turnNumber)}}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={() => {console.log(boardState.turnNumber)}} disabled={disabled}>
                     <Text>
                         Raise
                     </Text>
                 </TouchableOpacity>
 
-                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet}/>
+                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled}/>
             </View>
         </View>
     )

@@ -31,18 +31,18 @@ function initGame() {
             0: { // ataPlayer
                 playerNumber: 0,
                 remainingChips: 500,
-                betSize: 90,
+                betSize: 50,
                 klafs: [allKlafs[Math.floor(Math.random() * 10)], allKlafs[Math.floor(Math.random() * 10)]]
             },
             1: {
                 playerNumber: 1,
                 remainingChips: 500,
-                betSize: 70
+                betSize: 0
             },
             2: {
                 playerNumber: 2,
                 remainingChips: 500,
-                betSize: 80
+                betSize: 0
             }
         }
     }
@@ -83,6 +83,7 @@ function handleNextRound(input) {
 
     // update player state
     data['player']['remainingChips'] = data['player']['remainingChips'] - data['betAmount'];
+    data['player']['betSize'] = data['betAmount'];
 
 
     const output = JSON.stringify(data);

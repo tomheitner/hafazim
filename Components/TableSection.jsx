@@ -4,7 +4,16 @@ import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
 
-export default function TableSection({boardState, NextTurnOther}) {
+export default function TableSection({boardState, changeTurn}) {
+
+    function handleNextTurn() {
+        if (boardState.turnNumber === 0) {
+            changeTurn(50);
+        }
+        else {
+            changeTurn(Math.floor(Math.random() * 10));
+        }
+    }
     return (
         <View style={[styles.mainContainer]} on>  
 
@@ -17,7 +26,7 @@ export default function TableSection({boardState, NextTurnOther}) {
             </View>
 
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={globalStyles.genericButton} onPress={NextTurnOther}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={handleNextTurn}>
                     <Text>▶️</Text>
                 </TouchableOpacity>
                 <View style={styles.potContainer}>

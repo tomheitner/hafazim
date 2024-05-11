@@ -24,9 +24,15 @@ export default function MainScreen() {
     }, [])
 
     function changeTurn(betAmount) {
+
+        // Other Players
+        if (betAmount === null) {
+            betAmount = Math.floor(Math.random() * 10);
+        }
+
         const input = {
             boardState: boardState,
-            player: players['0'],
+            player: players[boardState['turnNumber']],
             betAmount: betAmount
         }
 
@@ -53,7 +59,7 @@ export default function MainScreen() {
 
 
             <View style={styles.midRow}>
-                <TableSection boardState={boardState}/>
+                <TableSection boardState={boardState} changeTurn={changeTurn}/>
             </View>
 
             <View style={styles.bottomRow}>
