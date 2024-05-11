@@ -13,23 +13,27 @@ const allKlafs = [
 
 export const restApi = {
     'initGame': initGame,
-    'nextTurn': nextTurn,
+    'nextTurn': handleNextRound,
 }
 
 // functions
 
 function initGame() {
     const output = {
-        potSize: 0,
-        turnNumber: 0, // whos turn it is
-        tableKlafs: [null, null, null, null, null],
-        ataPlayer: {
-            playerNumber: 0,
-            remainingChips: 500,
-            betSize: 90,
-            klafs: [allKlafs[Math.floor(Math.random()*10)], allKlafs[Math.floor(Math.random()*10)]]
+        boardState: {
+            potSize: 0,
+            turnNumber: 0, // whos turn it is
+            roundNumber: 0, // the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
+            tableKlafs: [null, null, null, null, null],
         },
-        otherPlayers: { // key is the player number for each player
+        
+        players: { // key is the player number for each player
+            0: { // ataPlayer
+                playerNumber: 0,
+                remainingChips: 500,
+                betSize: 90,
+                klafs: [allKlafs[Math.floor(Math.random() * 10)], allKlafs[Math.floor(Math.random() * 10)]]
+            },
             1: {
                 playerNumber: 1,
                 remainingChips: 500,
@@ -46,10 +50,42 @@ function initGame() {
     return JSON.stringify(output)
 }
 
-function nextTurn(input) {
-    data = JSON.parse(input);
+function handleNextRound(input) {
+    // input scheme: {boardState, player, betAmount}
 
-    if (data['turnNumber'] > 1) return 0;
-    else return (data['turnNumber'] + 1);
-} 
- 
+    const data = JSON.parse(input);
+
+    //calc new turn number
+    if (data['boardState']['turnNumber'] > 1) data['boardState']['turnNumber'] = 0;
+    else data['boardState']['turnNumber'] = data['boardState']['turnNumber'] + 1;
+
+    // calc round number
+    let roundNumber = data['boardState']['roundNumber']
+    let tableKlafs = data.boardState.tableKlafs
+    if (data.boardState.turnNumber == 0) { // if turn changed
+        if (roundNumber === 0) {
+            data['boardState']['roundNumber'] = 1;
+            data['boardState']['tableKlafs'] = [allKlafs[Math.floor(Math.random() * 10)], allKlafs[Math.floor(Math.random() * 10)], allKlafs[Math.floor(Math.random() * 10)], null, null];
+        }
+        else if (roundNumber === 1) {
+            data['boardState']['roundNumber'] = 2;            
+            tableKlafs[3] = allKlafs[Math.floor(Math.random() * 10)];
+            data.boardState.tableKlafs = tableKlafs;
+        }
+        else if (roundNumber === 2) {
+            data['boardState']['roundNumber'] = 3;            
+            tableKlafs[4] = allKlafs[Math.floor(Math.random() * 10)];
+            data.boardState.tableKlafs = tableKlafs;
+        }
+    }
+
+    data['boardState']['potSize'] = data['boardState']['potSize'] + data['betAmount']  // update pot size
+
+    // update player state
+    data['player']['remainingChips'] = data['player']['remainingChips'] - data['betAmount'];
+
+
+    const output = JSON.stringify(data);
+    return output;
+
+}

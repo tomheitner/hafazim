@@ -24,13 +24,22 @@ export default function DrawBoard() {
                 />
 
             </View>
+
+            <View>
+                <TouchableHighlight style={globalStyles.genericButton} onPress={onDraw}>
+                    <Text>Draw</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight style={globalStyles.genericButton} onPress={onErase}>
+                    <Text>Delete</Text>
+                </TouchableHighlight>
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     mainContainer: {
-        flex: 1,
         backgroundColor: COLORS.base300,
         borderColor: 'red'
     },

@@ -1,22 +1,25 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
 import { COLORS } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
 
-export default function TableSection({boardState}) {
+export default function TableSection({boardState, NextTurnOther}) {
     return (
-        <View style={[styles.mainContainer]}>            
+        <View style={[styles.mainContainer]} on>  
 
             <View style={styles.midRow}>
-                <HefezKlaf moreCardStyles={styles.klaf}/>
-                <HefezKlaf moreCardStyles={styles.klaf}/>
-                <HefezKlaf moreCardStyles={styles.klaf}/>
-                <HefezKlaf moreCardStyles={styles.klaf}/>
-                <HefezKlaf moreCardStyles={styles.klaf}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][0] : null}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][1] : null}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][2] : null}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][3] : null}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][4] : null}/>
             </View>
 
             <View style={styles.bottomRow}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={NextTurnOther}>
+                    <Text>▶️</Text>
+                </TouchableOpacity>
                 <View style={styles.potContainer}>
                     <Text>Pot: {boardState['potSize']}$</Text>
                 </View>
@@ -40,7 +43,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '20%',
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
 
     },
     midRow: {

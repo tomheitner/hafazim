@@ -1,12 +1,16 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
 import { COLORS } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
+import { callApi } from '../mock-server/callApi';
 
 
 export default function PlayerSection({player, boardState, changeTurn}) {
 
-    
+    function handleBet(e) {
+        console.log(e.nativeEvent.text);
+    }
+
     return (
         <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline]}>
 
@@ -22,7 +26,7 @@ export default function PlayerSection({player, boardState, changeTurn}) {
             </View>
 
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={globalStyles.genericButton} onPress={changeTurn}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={() => changeTurn(50)}>
                     <Text>
                         Call
                     </Text>
@@ -39,6 +43,8 @@ export default function PlayerSection({player, boardState, changeTurn}) {
                         Raise
                     </Text>
                 </TouchableOpacity>
+
+                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet}/>
             </View>
         </View>
     )
@@ -75,6 +81,11 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         justifyContent: 'center',
         width: '30%'
+    },
+    inputButton: {
+        backgroundColor: COLORS.base100,
+        width: 100,
+        height: 50
     }
 
   });

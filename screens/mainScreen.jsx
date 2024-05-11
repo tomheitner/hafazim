@@ -8,31 +8,38 @@ import OtherPlayerSection from '../Components/OtherPlayerSection';
 
 
 export default function MainScreen() {
-    const [ataPlayer, setAtaPlayer] = useState({});
     const [boardState, setBoardState] = useState({});
-    const [otherPlayers, setOtherPlayers] = useState({1: {}, 2: {}});
+    const [players, setPlayers] = useState({0: {}, 1: {}, 2: {}});
 
     //Init
     useEffect(() => {
-        const output = callApi('initGame');
-        console.log(output);
+        const data = callApi('initGame');
+        console.log('init game data: ', data);
 
         // parse into state
-        setBoardState({
-            turnNumber: output['turnNumber'],
-            potSize: output['potSize'],
-            tableKlafs: output['tableKlafs']
-        })
-        setAtaPlayer(output['ataPlayer']);
-        setOtherPlayers(output['otherPlayers'])
+        setBoardState(data['boardState'])
+        // setAtaPlayer(data['ataPlayer']);
+        // setOtherPlayers(data['otherPlayers'])
+        setPlayers(data['players'])
     }, [])
 
-    function changeTurn() {
-        // get new turn number
-        const output = callApi('nextTurn', JSON.stringify({turnNumber: boardState.turnNumber}));
-        const newBoardState = {...boardState};
-        newBoardState['turnNumber'] = output;
-        setBoardState(newBoardState);
+    function changeTurn(betAmount) {
+        const input = {
+            boardState: boardState,
+            player: players['0'],
+            betAmount: betAmount
+        }
+
+        const output = callApi('nextTurn', JSON.stringify(input));
+
+        console.log('New turn data: ', output);
+
+        // update state
+        setBoardState(output['boardState']);
+
+        const newPlayers = {...players};
+        newPlayers[output['player']['playerNumber']] = output['player']
+        setPlayers(newPlayers);
     }
 
 
@@ -40,8 +47,8 @@ export default function MainScreen() {
         <View style={[styles.mainContainer]}>
 
             <View style={styles.topRow}>
-                <OtherPlayerSection player={otherPlayers['1']} boardState={boardState}/>
-                <OtherPlayerSection player={otherPlayers['2']} boardState={boardState}/>
+                <OtherPlayerSection player={players['1']} boardState={boardState}/>
+                <OtherPlayerSection player={players['2']} boardState={boardState}/>
             </View>
 
 
@@ -50,7 +57,7 @@ export default function MainScreen() {
             </View>
 
             <View style={styles.bottomRow}>
-                <PlayerSection player={ataPlayer} boardState={boardState} changeTurn={changeTurn}/>
+                <PlayerSection player={players['0']} boardState={boardState} changeTurn={changeTurn}/>
             </View>
         </View>
     )

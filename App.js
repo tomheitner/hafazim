@@ -5,8 +5,8 @@ import DrawScreen from './screens/DrawScreen';
 
 export default function App() {
   return (
-    // <MainScreen />
-    <DrawScreen />
+    <MainScreen />
+    // <DrawScreen />
   );
 }
 
