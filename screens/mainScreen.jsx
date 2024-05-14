@@ -25,11 +25,6 @@ export default function MainScreen() {
 
     function changeTurn(betAmount) {
 
-        // Other Players
-        if (betAmount === null) {
-            betAmount = Math.floor(Math.random() * 10);
-        }
-
         const input = {
             boardState: boardState,
             player: players[boardState['turnNumber']],
@@ -48,6 +43,20 @@ export default function MainScreen() {
         setPlayers(newPlayers);
     }
 
+    function finishGame(winner) {
+        const input = {
+            boardState: boardState,
+            players: players,
+            winner: winner
+        }
+
+        const data = callApi('finishGame', JSON.stringify(input));
+
+        // update state
+        setBoardState(data.boardState);
+        setPlayers(data.players);
+    }
+
 
     return (
         <View style={[styles.mainContainer]}>
@@ -59,7 +68,7 @@ export default function MainScreen() {
 
 
             <View style={styles.midRow}>
-                <TableSection boardState={boardState} changeTurn={changeTurn}/>
+                <TableSection boardState={boardState} changeTurn={changeTurn} finishGame={finishGame}/>
             </View>
 
             <View style={styles.bottomRow}>

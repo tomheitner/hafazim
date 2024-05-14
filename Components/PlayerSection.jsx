@@ -3,37 +3,52 @@ import { COLORS } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { callApi } from '../mock-server/callApi';
+import { useState } from 'react';
 
 
-export default function PlayerSection({player, boardState, changeTurn}) {
+export default function PlayerSection({ player, boardState, changeTurn }) {
+
+    const [raiseAmount, setRaiseAmount] = useState(0);
 
 
     disabled = (boardState['turnNumber'] !== player['playerNumber']);
-    console.log(boardState['turnNumber']);
-    console.log(player['turnNumber']);
 
     function handleBet(e) {
-        console.log(e.nativeEvent.text);
+        setRaiseAmount(Number(e.nativeEvent.text));
+    }
+
+    function handleCall() {
+        const betAmount = boardState.minBetSize - player.betSize;
+        changeTurn(betAmount);
+    }
+
+    function handleRaise() {
+        const betAmount = raiseAmount;
+        changeTurn(betAmount);
     }
 
     return (
         <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline, disabled && globalStyles.disabled]}>
 
             <View style={styles.topRow}>
-                <View style={styles.betContainer}>
+                <View style={{justifyContent: 'center'}}>
+                    <Text>🪙: {player['remainingChips']}</Text>
+                </View>
+                
+                <View style={[styles.betContainer, (boardState['actionOn'] === player['playerNumber']) && globalStyles.chosenOutline]}>
                     <Text>Bet: {player['betSize']}$</Text>
                 </View>
             </View>
 
             <View style={styles.midRow}>
-                <HefezKlaf title={'klafs' in player ? player['klafs'][0] : null}/>
-                <HefezKlaf title={'klafs' in player ? player['klafs'][1] : null}/>
+                <HefezKlaf title={'klafs' in player ? player['klafs'][0] : null} />
+                <HefezKlaf title={'klafs' in player ? player['klafs'][1] : null} />
             </View>
 
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={[globalStyles.genericButton]} onPress={() => changeTurn(50)} disabled={disabled}>
+                <TouchableOpacity style={[globalStyles.genericButton]} onPress={handleCall} disabled={disabled}>
                     <Text>
-                        Call
+                        {boardState['minBetSize'] === 0 ? 'Check' : "Call"}
                     </Text>
                 </TouchableOpacity>
 
@@ -43,13 +58,13 @@ export default function PlayerSection({player, boardState, changeTurn}) {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={() => {console.log(boardState.turnNumber)}} disabled={disabled}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={handleRaise} disabled={disabled}>
                     <Text>
                         Raise
                     </Text>
                 </TouchableOpacity>
 
-                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled}/>
+                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled} />
             </View>
         </View>
     )
@@ -57,16 +72,16 @@ export default function PlayerSection({player, boardState, changeTurn}) {
 
 const styles = StyleSheet.create({
     mainContainer: {
-      width: '100%',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      backgroundColor: COLORS.base500,
+        width: '100%',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: COLORS.base500,
     },
     topRow: {
         width: '100%',
         height: '20%',
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
 
     },
     midRow: {
@@ -93,4 +108,4 @@ const styles = StyleSheet.create({
         height: 50
     }
 
-  });
+});

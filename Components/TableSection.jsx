@@ -2,56 +2,85 @@ import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
 import { COLORS } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
+import { getRandomInt } from '../mock-server/restApi';
 
 
-export default function TableSection({boardState, changeTurn}) {
+export default function TableSection({ boardState, changeTurn, finishGame }) {
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {
             changeTurn(50);
         }
         else {
-            changeTurn(Math.floor(Math.random() * 10));
+            const randChoose = getRandomInt(0, 1);
+            if (randChoose >= 0) changeTurn(boardState.minBetSize);
+            else changeTurn(getRandomInt(boardState['minBetSize'], boardState['minBetSize'] + 50));
         }
     }
     return (
-        <View style={[styles.mainContainer]} on>  
+        <View style={[styles.mainContainer]} on>
 
             <View style={styles.midRow}>
-                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][0] : null}/>
-                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][1] : null}/>
-                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][2] : null}/>
-                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][3] : null}/>
-                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][4] : null}/>
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][0] : null} />
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][1] : null} />
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][2] : null} />
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][3] : null} />
+                <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][4] : null} />
             </View>
-
+           
             <View style={styles.bottomRow}>
-                <TouchableOpacity style={globalStyles.genericButton} onPress={handleNextTurn}>
-                    <Text>▶️</Text>
-                </TouchableOpacity>
 
-                <View style={{justifyContent: 'center'}}>
-                    <Text>Bet Size: {boardState['minBetSize']} $</Text>
-                </View>
+            {boardState['roundNumber'] === 4 ?
+                <>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-evenly', gap: 10}}>
+                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(0)}>
+                            <Text>👑0</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(1)}>
+                            <Text>👑1</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(2)}>
+                            <Text>👑2</Text>
+                        </TouchableOpacity>
+                    </View>
+                </>
+                :
+                <>
+                    <TouchableOpacity style={globalStyles.genericButton} onPress={handleNextTurn}>
+                        <Text>▶️</Text>
+                    </TouchableOpacity>
+
+
+
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text>Bet Size: {boardState['minBetSize']} $</Text>
+                        <Text>Action On: Player {boardState['actionOn']}</Text>
+                        <Text>Round: {boardState['roundNumber']}</Text>
+                    </View>
+                </>
+            }
+
 
                 <View style={styles.potContainer}>
                     <Text>Pot: {boardState['potSize']}$</Text>
                 </View>
             </View>
 
-            
+
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     mainContainer: {
-      width: '100%',
-      height: '75%',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      backgroundColor: COLORS.base500,
-      justifyContent: 'space-between',
+        width: '100%',
+        height: '75%',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: COLORS.base500,
+        justifyContent: 'space-between',
     },
     bottomRow: {
         width: '100%',
@@ -77,4 +106,4 @@ const styles = StyleSheet.create({
         width: '17%'
     }
 
-  });
+});
