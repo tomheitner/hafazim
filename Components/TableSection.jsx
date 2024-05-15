@@ -12,8 +12,8 @@ export default function TableSection({ boardState, changeTurn, finishGame }) {
             changeTurn(50);
         }
         else {
-            const randChoose = getRandomInt(0, 1);
-            if (randChoose >= 0) changeTurn(boardState.minBetSize);
+            const randChoose = getRandomInt(0, 10);
+            if (randChoose > 7) changeTurn(boardState.minBetSize);
             else changeTurn(getRandomInt(boardState['minBetSize'], boardState['minBetSize'] + 50));
         }
     }

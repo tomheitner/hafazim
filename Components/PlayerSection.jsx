@@ -64,7 +64,7 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
                     </Text>
                 </TouchableOpacity>
 
-                <TextInput keyboardType='numeric' placeholder='bet' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled} />
+                <TextInput keyboardType='numeric' placeholder='gogo' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled} />
             </View>
         </View>
     )
