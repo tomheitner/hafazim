@@ -9,7 +9,7 @@ import io from 'socket.io-client';
 import SocketListeners from '../Components/SocketListeners';
 
 
-const socket = io('http://192.168.1.110:5000');  // Adjust the URL as needed
+const socket = io('http://192.168.1.111:5000');  // Adjust the URL as needed
 
 export default function MainScreen() {
     const [boardState, setBoardState] = useState({});
