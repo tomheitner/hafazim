@@ -5,7 +5,7 @@ import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
 
 
-export default function TableSection({ boardState, changeTurn, finishGame }) {
+export default function TableSection({ boardState, changeTurn, finishGame, players }) {
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {
@@ -13,8 +13,15 @@ export default function TableSection({ boardState, changeTurn, finishGame }) {
         }
         else {
             const randChoose = getRandomInt(0, 10);
-            if (randChoose > 7) changeTurn(boardState.minBetSize);
-            else changeTurn(getRandomInt(boardState['minBetSize'], boardState['minBetSize'] + 50));
+            if (randChoose > 7) { // raise
+                const callAmount = players[boardState.turnNumber].betSize - boardState.minBetSize;
+                const betAmount = getRandomInt(callAmount + 1, callAmount + 100);
+                changeTurn(betAmount);
+            } 
+            else { //call
+                const betAmount = boardState.minBetSize - players[boardState.turnNumber].betSize;
+                changeTurn(betAmount);
+            } 
         }
     }
     return (

@@ -8,7 +8,7 @@ import { useState } from 'react';
 
 export default function PlayerSection({ player, boardState, changeTurn }) {
 
-    const [raiseAmount, setRaiseAmount] = useState(0);
+    const [raiseAmount, setRaiseAmount] = useState(null);
 
 
     disabled = (boardState['turnNumber'] !== player['playerNumber']);
@@ -25,6 +25,7 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
     function handleRaise() {
         const betAmount = raiseAmount;
         changeTurn(betAmount);
+        setRaiseAmount(null);
     }
 
     return (
@@ -58,13 +59,13 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={handleRaise} disabled={disabled}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={handleRaise} disabled={disabled || (raiseAmount === null) || (raiseAmount !== null && raiseAmount <= boardState.minBetSize)}>
                     <Text>
                         Raise
                     </Text>
                 </TouchableOpacity>
 
-                <TextInput keyboardType='numeric' placeholder='gogo' style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled} />
+                <TextInput keyboardType='numeric' placeholder={'min: ' + boardState.minBetSize} style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled}/>
             </View>
         </View>
     )

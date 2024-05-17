@@ -6,41 +6,37 @@ import { callApi } from '../mock-server/callApi';
 import PlayerSection from '../Components/PlayerSection';
 import OtherPlayerSection from '../Components/OtherPlayerSection';
 import io from 'socket.io-client';
+import SocketListeners from '../Components/SocketListeners';
 
 
-const socket = io('http://192.168.1.190:5000');  // Adjust the URL as needed
+const socket = io('http://192.168.1.110:5000');  // Adjust the URL as needed
 
 export default function MainScreen() {
     const [boardState, setBoardState] = useState({});
     const [players, setPlayers] = useState({ 0: {}, 1: {}, 2: {} });
+    const [roomId, setRoomId] = useState(null)
 
     //Init
     useEffect(() => {
-        // const data = callApi('initGame');
-        // console.log('init game data: ', data);
-
+        console.log('useEffect');
         socket.emit('init_game', {})
-
-        // // parse into state
-        // setBoardState(data['boardState'])
-        // // setAtaPlayer(data['ataPlayer']);
-        // // setOtherPlayers(data['otherPlayers'])
-        // setPlayers(data['players'])
-
-
-
     }, [])
 
+    
+    // Server Listeners
     useEffect(() => {
         // --SERVER LISTENERS--
-        socket.on('init_game', data => {
-            console.log(data);
+        socket.on('update_room', data => {
+            console.log('update room to ', data);
             // parse into state
-            setBoardState(data['boardState'])
+            setBoardState(data['board'])
             // setAtaPlayer(data['ataPlayer']);
             // setOtherPlayers(data['otherPlayers'])
             setPlayers(data['players'])
+            setRoomId(data['roomId'])
         });
+
+
 
 
         return () => {
@@ -48,7 +44,7 @@ export default function MainScreen() {
         }
     }, [])
 
-    function changeTurn(betAmount) {
+    function changeTurnOld(betAmount) {
 
         const input = {
             boardState: boardState,
@@ -68,6 +64,14 @@ export default function MainScreen() {
         setPlayers(newPlayers);
     }
 
+    function changeTurn(betAmount) {
+        const input = {
+            'betAmount': betAmount,
+            'roomId': roomId
+        }
+        socket.emit('next_turn', input)
+    }
+
     function finishGame(winner) {
         const input = {
             boardState: boardState,
@@ -84,8 +88,9 @@ export default function MainScreen() {
 
     // SERVER FUNCTIONS
     function handle_add_chips(chipsAmount) {
+        console.log('called add chips');
         const input = { chips: chipsAmount }
-        socket.emit('init_game', input)
+        socket.emit('add_chips', input)
     }
 
 
@@ -93,18 +98,18 @@ export default function MainScreen() {
         <View style={[styles.mainContainer]}>
 
             <View style={styles.topRow}>
-                <OtherPlayerSection player={players['1']} boardState={boardState} />
-                <OtherPlayerSection player={players['2']} boardState={boardState} />
+                <OtherPlayerSection player={players[1]} boardState={boardState} />
+                <OtherPlayerSection player={players[2]} boardState={boardState} />
             </View>
 
 
             <View style={styles.midRow}>
-                {/* <TableSection boardState={boardState} changeTurn={changeTurn} finishGame={finishGame}/> */}
-                <Button title='add_chips' onPress={() => handle_add_chips(50)} />
+                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame}/>
+                {/* <Button title='add_chips' onPress={() => socket.emit('show_rooms', {})} /> */}
             </View>
 
             <View style={styles.bottomRow}>
-                <PlayerSection player={players['0']} boardState={boardState} changeTurn={changeTurn} />
+                <PlayerSection player={players[0]} boardState={boardState} changeTurn={changeTurn} />
             </View>
         </View>
     )
