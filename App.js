@@ -2,13 +2,28 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import MainScreen from './screens/mainScreen';
 import DrawScreen from './screens/DrawScreen';
-import ServerSCreen from './screens/ServerScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import InitScreen from './screens/InitScreen';
+
+const Stack = createNativeStackNavigator();
+
+
 
 export default function App() {
   return (
-    <MainScreen />
-    // <DrawScreen />
-    // <ServerSCreen />
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: "fade_from_bottom",
+        }}
+        initialRouteName="Init"
+      >
+        <Stack.Screen name='Init' component={InitScreen}/>
+        <Stack.Screen name='Main' component={MainScreen}/>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

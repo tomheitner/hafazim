@@ -5,24 +5,22 @@ import TableSection from '../Components/TableSection';
 import { callApi } from '../mock-server/callApi';
 import PlayerSection from '../Components/PlayerSection';
 import OtherPlayerSection from '../Components/OtherPlayerSection';
-import io from 'socket.io-client';
-import SocketListeners from '../Components/SocketListeners';
+// import io from 'socket.io-client';
+import { socket } from '../socketConnector';
 
 
-const socket = io('http://192.168.1.190:5000');  // Adjust the URL as needed
-
-export default function MainScreen() {
+export default function MainScreen({ route, navigation }) {
     const [boardState, setBoardState] = useState({});
     const [players, setPlayers] = useState({ 0: {}, 1: {}, 2: {} });
+    const [ataPlayerNumber, setAtaPlayerNumber] = useState(null);
     const [roomId, setRoomId] = useState(null)
 
     //Init
     useEffect(() => {
-        console.log('useEffect');
-        socket.emit('init_game', {})
-    }, [])
+        if (roomId) socket.emit('get_player_number', { 'roomId': roomId })
+    }, [roomId])
 
-    
+
     // Server Listeners
     useEffect(() => {
         // --SERVER LISTENERS--
@@ -30,39 +28,21 @@ export default function MainScreen() {
             console.log('update room to ', data);
             // parse into state
             setBoardState(data['board'])
-            // setAtaPlayer(data['ataPlayer']);
-            // setOtherPlayers(data['otherPlayers'])
             setPlayers(data['players'])
             setRoomId(data['roomId'])
         });
 
-
+        socket.on('my_player_number', (data) => {
+            console.log('got player number - ', data['playerNumber']);
+            setAtaPlayerNumber(data['playerNumber']);
+        })
 
 
         return () => {
-            socket.off('init_game');
+            socket.off('update_room');
+            socket.off('my_player_number');
         }
     }, [])
-
-    function changeTurnOld(betAmount) {
-
-        const input = {
-            boardState: boardState,
-            player: players[boardState['turnNumber']],
-            betAmount: betAmount
-        }
-
-        const output = callApi('nextTurn', JSON.stringify(input));
-
-        console.log('New turn data: ', output);
-
-        // update state
-        setBoardState(output['boardState']);
-
-        const newPlayers = { ...players };
-        newPlayers[output['player']['playerNumber']] = output['player']
-        setPlayers(newPlayers);
-    }
 
     function changeTurn(betAmount) {
         const input = {
@@ -72,7 +52,7 @@ export default function MainScreen() {
         socket.emit('next_turn', input)
     }
 
-    function finishGame(winner) {
+    function finishGame(winner) { // **STILL USES MOCK API**
         const input = {
             boardState: boardState,
             players: players,
@@ -98,18 +78,21 @@ export default function MainScreen() {
         <View style={[styles.mainContainer]}>
 
             <View style={styles.topRow}>
-                <OtherPlayerSection player={players[1]} boardState={boardState} />
-                <OtherPlayerSection player={players[2]} boardState={boardState} />
+                {/* <OtherPlayerSection player={players[1]} boardState={boardState} /> */}
+                {/* <OtherPlayerSection player={players[2]} boardState={boardState} /> */}
             </View>
 
 
             <View style={styles.midRow}>
-                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame}/>
-                {/* <Button title='add_chips' onPress={() => socket.emit('show_rooms', {})} /> */}
+                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} />
+                {/* <Button title='add_chips' onPress={() => socket.emit('list_rooms')} /> */}
             </View>
 
             <View style={styles.bottomRow}>
-                <PlayerSection player={players[0]} boardState={boardState} changeTurn={changeTurn} />
+                {ataPlayerNumber !== null ?
+                    <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} />
+                    : null
+                }
             </View>
         </View>
     )

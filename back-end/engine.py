@@ -44,23 +44,23 @@ player_schema = {
 
 }
 
-def create_new_room():
-    new_room = room_schema.copy()
-    new_room['roomId'] = len(rooms) + 1
+def create_new_room(room_id):
+    new_room = {}
+    new_room['roomId'] = room_id
 
     # Create new board
     new_board = create_new_board()
 
     # Create 3 new players
     new_players = []
-    for i in range(3):
-        new_player = create_new_player(player_number=i)
-        new_players.append(new_player)
+    # for i in range(3):
+    #     new_player = create_new_player(player_number=i)
+    #     new_players.append(new_player)
     
     new_room['board'] = new_board
     new_room['players'] = new_players
 
-    print('--new room: ', new_room)
+    print('--[engine] new room: ', new_room)
 
     return new_room
 
@@ -80,8 +80,9 @@ def create_new_board():
 
 
 
-def create_new_player(player_number):
+def create_new_player(player_number, sid):
     new_player = {
+                'sid': sid,
                 'playerNumber': player_number,
                 'remainingChips': STRATING_CHIPS,
                 'betSize': 0,

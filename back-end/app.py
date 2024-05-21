@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_socketio import SocketIO, send, emit, join_room, leave_room
+from flask_socketio import SocketIO, send, emit, join_room, leave_room, rooms
 import engine
 from random import randint
 
@@ -12,9 +12,8 @@ def index():
     return "SocketIO Server"
 
 @socketio.on('connect')
-def handle_connect(data):
-    print('--user connected--')
-    print('data: ', data)
+def handle_connect():
+    print('--user connected with sid: ', request.sid)
 
 @socketio.on('message')
 def handle_message(msg):
@@ -50,50 +49,6 @@ def next_round(my_room):
     
 
 # Game API
-@socketio.on('init_game_old')
-def init_game_old(data):
-    print('--init game--')
-    output = {
-        'boardState': {
-            'potSize': 0,
-            'actionOn': 0, # which player has the action, when a player raises the action moves to him and only if it goes to the actionOn turn number without a raise you move to the next round
-            'turnNumber': 0, # whos turn it is
-            'roundNumber': 0, # the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
-            'tableKlafs': [None, None, None, None, None],
-            'minBetSize': engine.MIN_STAKE,
-        },
-
-        'players': { # key is the player number for each player
-            0: { # ataPlayer
-                'playerNumber': 0,
-                'remainingChips': engine.STRATING_CHIPS,
-                'betSize': 0,
-                'klafs': [engine.ALL_KLAFS[randint(0, 9)], engine.ALL_KLAFS[randint(0, 9)]]
-            },
-            1: {
-                'playerNumber': 1,
-                'remainingChips': engine.STRATING_CHIPS,
-                'betSize': 0
-            },
-            2: {
-                'playerNumber': 2,
-                'remainingChips': engine.STRATING_CHIPS,
-                'betSize': 0
-            }
-        }
-    }
-    emit('init_game', output)
-
-
-@socketio.on('init_game')
-def init_game(data):
-    print('--init game--')
-    new_room = engine.create_new_room()
-    engine.rooms[new_room['roomId']] = new_room
-
-    emit('update_room', new_room)
-
-
 @socketio.on('next_turn')
 def next_turn(data):
     # input scheme: {room_id: int, betAmout: int}
@@ -108,7 +63,8 @@ def next_turn(data):
 
     
     # Calc new turn number (which player)
-    if my_room['board']['turnNumber'] >= engine.NUM_PLAYERS - 1:
+    # if my_room['board']['turnNumber'] >= engine.NUM_PLAYERS - 1:
+    if my_room['board']['turnNumber'] >= len(my_room['players']) - 1:
         my_room['board']['turnNumber'] = 0
     
     else:
@@ -126,10 +82,65 @@ def next_turn(data):
         
     
 
-@socketio.on('show_rooms')
-def show_rooms(data):
+@socketio.on('create_room')
+def create_room(data):
+    # input schema: roomId: str
+
+    print('--init game--')
+    new_room = engine.create_new_room(room_id=data['roomId'])
+
+    # Add player to room
+    new_player = engine.create_new_player(0, request.sid)
+    new_room['players'].append(new_player)
+    join_room(data['roomId'])  # Adds the current sid holder to the room
+
+
+    engine.rooms[new_room['roomId']] = new_room
+    print('--created new room: ', new_room)
+
+    emit('update_room', new_room, to=new_room['roomId'])
+
+
+@socketio.on('add_player_to_room')
+def add_player_to_room(data):
+    # Data schema: {roomId}
+    print(f'Adding player {request.sid} to room {data["roomId"]}') # TODO: Remove to protect from injections
+    my_room = engine.rooms[data['roomId']]
+
+    # First check if the player is already in the room
+    for player in my_room['players']:
+        if player['sid'] == request.sid:
+            print('--found player in room already - doing nothing (rejoin)--')
+            return
+
+
+    join_room(data['roomId']) # joins the sid to the room
+
+    # Create the new player and add to room
+    new_player = engine.create_new_player(len(my_room['players']), request.sid)
+    my_room['players'].append(new_player)
+
+    emit('update_room', my_room)
+
+
+@socketio.on('get_player_number')
+def get_player_number(data):
+    # Data schema: {roomId}; output schema: {playerNumber}
+    # Returns the player number matching sid of the requester
+    room_players = engine.rooms[data['roomId']]['players']
+    output = {}
+    for player in room_players:
+        if player['sid'] == request.sid:
+            output['playerNumber'] = player['playerNumber']
+    
+    emit('my_player_number', output)
+
+@socketio.on('list_rooms')
+def show_rooms():
+    print('--showing rooms: ', rooms())
     print('rooms size: ', len(engine.rooms))
     print('--all rooms: ', engine.rooms)
+    
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
