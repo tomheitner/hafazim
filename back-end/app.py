@@ -11,6 +11,11 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 def index():
     return "SocketIO Server"
 
+@socketio.on('connect')
+def handle_connect(data):
+    print('--user connected--')
+    print('data: ', data)
+
 @socketio.on('message')
 def handle_message(msg):
     print(f"Message: {msg}")
