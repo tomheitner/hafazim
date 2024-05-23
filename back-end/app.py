@@ -78,7 +78,7 @@ def next_turn(data):
     if (my_room['board']['turnNumber'] == my_room['board']['actionOn']):  # if round changed
         next_round(my_room) 
 
-    socketio.emit('update_room', my_room)
+    emit('update_room', my_room)
         
     
 
@@ -122,6 +122,15 @@ def add_player_to_room(data):
 
     emit('update_room', my_room)
 
+
+@socketio.on('get_room')
+def get_room(data):
+    # Data schema: {roomId, sendAll}; sendAll - bool, whether to emit the data to the entire room or just the requester sid
+    send_to = data['roomId'] if data['sendAll'] == True else request.sid
+    print('--sending room data to room ', send_to)
+    
+    room_data = engine.rooms[data['roomId']]
+    emit('update_room', room_data, to=send_to)
 
 @socketio.on('get_player_number')
 def get_player_number(data):
