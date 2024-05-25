@@ -44,6 +44,7 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
             <View style={styles.midRow}>
                 <HefezKlaf title={'klafs' in player ? player['klafs'][0] : null} />
                 <HefezKlaf title={'klafs' in player ? player['klafs'][1] : null} />
+                
             </View>
 
             <View style={styles.bottomRow}>

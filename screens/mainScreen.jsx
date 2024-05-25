@@ -105,7 +105,7 @@ export default function MainScreen({ route, navigation }) {
 
 
             <View style={styles.midRow}>
-                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} />
+                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} navigation={navigation} />
                 {/* <Button title='add_chips' onPress={() => socket.emit('list_rooms')} /> */}
             </View>
 

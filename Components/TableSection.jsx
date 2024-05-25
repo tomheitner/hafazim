@@ -5,7 +5,7 @@ import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
 
 
-export default function TableSection({ boardState, changeTurn, finishGame, players }) {
+export default function TableSection({ navigation, boardState, changeTurn, finishGame, players }) {
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {
@@ -55,8 +55,8 @@ export default function TableSection({ boardState, changeTurn, finishGame, playe
                 </>
                 :
                 <>
-                    <TouchableOpacity style={globalStyles.genericButton} onPress={handleNextTurn}>
-                        <Text>▶️</Text>
+                    <TouchableOpacity style={globalStyles.genericButton} onPress={() => {navigation.navigate('Drawing')}}>
+                        <Text>🎨</Text>
                     </TouchableOpacity>
 
 

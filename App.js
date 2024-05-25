@@ -22,6 +22,7 @@ export default function App() {
       >
         <Stack.Screen name='Init' component={InitScreen}/>
         <Stack.Screen name='Main' component={MainScreen}/>
+        <Stack.Screen name='Drawing' component={DrawScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
