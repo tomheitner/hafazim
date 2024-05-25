@@ -78,7 +78,7 @@ def next_turn(data):
     if (my_room['board']['turnNumber'] == my_room['board']['actionOn']):  # if round changed
         next_round(my_room) 
 
-    emit('update_room', my_room)
+    emit('update_room', my_room, to=data['roomId'])
         
     
 
@@ -120,7 +120,8 @@ def add_player_to_room(data):
     new_player = engine.create_new_player(len(my_room['players']), request.sid)
     my_room['players'].append(new_player)
 
-    emit('update_room', my_room)
+    emit('update_room', my_room, to=data['roomId'])
+    print('--added--')
 
 
 @socketio.on('get_room')

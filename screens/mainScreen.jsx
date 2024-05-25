@@ -17,7 +17,34 @@ export default function MainScreen({ route, navigation }) {
     const [ataPlayerNumber, setAtaPlayerNumber] = useState(null);
     const [roomId, setRoomId] = useState(null)
 
-    //Init
+    // --Server Listeners--
+    useEffect(() => {
+        function onUpdateRoom(data) {
+            console.log('--server sent update_room with data ', data);
+            // parse into state
+            setBoardState(data['board'])
+            setPlayers(data['players'])
+            setRoomId(data['roomId'])
+        }
+        
+        function onGetPlayerNumber(data) {
+            console.log('--server sent my_player_number with data ', data);
+            setAtaPlayerNumber(data['playerNumber']);
+        }
+
+        // Set listerners
+        socket.on('update_room', onUpdateRoom);
+        socket.on('my_player_number', onGetPlayerNumber);
+
+
+        // Cancel listeners on shutdown
+        return () => {
+            socket.off('update_room');
+            socket.off('my_player_number');
+        }
+    }, [])
+
+    // Init
     useEffect(() => {
         if (roomId !== null) {
             console.log('asking server for my playerNumbr with roomId ', roomId);
@@ -43,30 +70,7 @@ export default function MainScreen({ route, navigation }) {
     }, [players, ataPlayerNumber])
 
 
-    // Server Listeners
-    useEffect(() => {
-        // --SERVER LISTENERS--
-
-        socket.on('update_room', data => {
-            console.log('update room to ', data);
-            // parse into state
-            setBoardState(data['board'])
-            setPlayers(data['players'])
-            setRoomId(data['roomId'])
-        });
-
-        socket.on('my_player_number', (data) => {
-            console.log('got player number - ', data['playerNumber']);
-            setAtaPlayerNumber(data['playerNumber']);
-        })
-
-
-        return () => {
-            socket.off('update_room');
-            socket.off('my_player_number');
-        }
-    }, [])
-
+    // API POST functions
     function changeTurn(betAmount) {
         const input = {
             'betAmount': betAmount,
@@ -87,13 +91,6 @@ export default function MainScreen({ route, navigation }) {
         // update state
         setBoardState(data.boardState);
         setPlayers(data.players);
-    }
-
-    // SERVER FUNCTIONS
-    function handle_add_chips(chipsAmount) {
-        console.log('called add chips');
-        const input = { chips: chipsAmount }
-        socket.emit('add_chips', input)
     }
 
 
