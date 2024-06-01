@@ -1,3 +1,4 @@
 import { io } from "socket.io-client";
-
-export const socket = io('http://192.168.1.190:5000');  // Adjust the URL as needed
+const IP_ADDRESS = 'http://10.100.102.19:5000'
+// localHost = 'http://192.168.1.190:5000'
+export const socket = io(IP_ADDRESS);  // Adjust the URL as needed

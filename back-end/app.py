@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_socketio import SocketIO, send, emit, join_room, leave_room, rooms
+from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 import engine
 from random import randint
 
@@ -14,11 +14,6 @@ def index():
 @socketio.on('connect')
 def handle_connect():
     print('--user connected with sid: ', request.sid)
-
-@socketio.on('message')
-def handle_message(msg):
-    print(f"Message: {msg}")
-    send(msg, broadcast=True)
 
 
 # Server API
@@ -150,7 +145,16 @@ def show_rooms():
     print('--showing rooms: ', rooms())
     print('rooms size: ', len(engine.rooms))
     print('--all rooms: ', engine.rooms)
-    
+
+
+@socketio.on('submit_drawing')
+def submit_drawing(data):
+    # Data schema: {roomId, playerNumber, drawingData}
+    my_room = engine.rooms[data['roomId']]
+    my_room['players'][data['playerNumber']]['drawing'] = data['drawingData'] # Update drawing for the selected player
+
+    emit('update_room',my_room , to=data['roomId']) # Send update to all players
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

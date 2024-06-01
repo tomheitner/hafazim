@@ -40,7 +40,12 @@ board_schema =  {
         },
 
 player_schema = {
-    'id': str,
+    'sid': str,
+    'playerNumber': int,
+    'klafs': list,
+    'remainingChips': int,
+    'drawing': str,
+    'selectedKlafs': list
 
 }
 
@@ -86,7 +91,9 @@ def create_new_player(player_number, sid):
                 'playerNumber': player_number,
                 'remainingChips': STRATING_CHIPS,
                 'betSize': 0,
-                'klafs': [ALL_KLAFS[randint(0, 9)], ALL_KLAFS[randint(0, 9)]]
+                'klafs': [ALL_KLAFS[randint(0, 9)], ALL_KLAFS[randint(0, 9)]],
+                'drawing': None,
+                'selectedKlafs': [None, None]
     }
     return new_player
 
