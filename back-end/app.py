@@ -87,13 +87,14 @@ def create_room(data):
     # Add player to room
     new_player = engine.create_new_player(0, request.sid)
     new_room['players'].append(new_player)
+    new_room['board']['winnerVotes'][0] = 0
     join_room(data['roomId'])  # Adds the current sid holder to the room
 
 
     engine.rooms[new_room['roomId']] = new_room
     print('--created new room: ', new_room)
 
-    emit('update_room', new_room, to=new_room['roomId'])
+    # emit('update_room', new_room, to=new_room['roomId'])
 
 
 @socketio.on('add_player_to_room')
@@ -109,24 +110,32 @@ def add_player_to_room(data):
             return
 
 
-    join_room(data['roomId']) # joins the sid to the room
 
     # Create the new player and add to room
-    new_player = engine.create_new_player(len(my_room['players']), request.sid)
+    ata_player_number = len(my_room['players'])
+    new_player = engine.create_new_player(ata_player_number, request.sid)
     my_room['players'].append(new_player)
+    my_room['board']['winnerVotes'][ata_player_number] = 0
+
+    my_room['ata_player_number'] = ata_player_number
 
     emit('update_room', my_room, to=data['roomId'])
+
+    join_room(data['roomId']) # joins the sid to the room
     print('--added--')
 
 
 @socketio.on('get_room')
 def get_room(data):
-    # Data schema: {roomId, sendAll}; sendAll - bool, whether to emit the data to the entire room or just the requester sid
-    send_to = data['roomId'] if data['sendAll'] == True else request.sid
-    print('--sending room data to room ', send_to)
+    # Data schema: {roomId} 
     
     room_data = engine.rooms[data['roomId']]
-    emit('update_room', room_data, to=send_to)
+
+    # Send player number
+    for player in room_data['players']:
+        if player['sid'] == request.sid:
+            room_data['ataPlayerNumber'] = player['playerNumber']
+    emit('update_room', room_data, to=request.sid)
 
 @socketio.on('get_player_number')
 def get_player_number(data):
@@ -139,6 +148,63 @@ def get_player_number(data):
             output['playerNumber'] = player['playerNumber']
     
     emit('my_player_number', output)
+
+@socketio.on('recieve_vote')
+def recieve_vote(data):
+    # data_schema: {roomId, voteFor}
+    print('--recieved vote with data ', data)
+    my_room = engine.rooms[data['roomId']]
+
+    my_room['board']['winnerVotes']['voteFor'] += 1
+
+    # Check if everyone voted
+    votes_count = sum(my_room['board']['winnerVotes'].values())
+    if votes_count >= len(my_room['board']['winnerVotes']):
+
+        # Calculate who won
+        winner_player_numbers = []
+        votes_to_win = max(my_room['board']['winnerVotes'].values()) # Calculate the amount of votes needed for one or more players to win the game
+
+        winner_player_numbers = [player['playerNumber'] for player in my_room['players'] if my_room['board']['winnerVotes'][player['playerNumber']] == votes_to_win] # Find the player numbers for players who got the needed amount of votes
+
+        finish_game({'roomId': data['roomId'], 'winningPlayers': winner_player_numbers})
+
+
+def finish_game(data):
+    # data schema: {roomId: str, winningPlayers: []}
+
+    print('--finishing the game with data: ', data)
+
+    my_room = engine.rooms[data['roomId']]
+    # Split the pot
+    pot_per_player = my_room['potSize'] // len(data['winningPlayers'])
+
+    # Give each player the pot he deserves
+    for i in range(len(my_room['players'])):
+        if my_room['players'][i]['playerNumber'] in data['winningPlayers']:
+            my_room['players'][i]['playerNumber']['remainingChips'] += pot_per_player
+    
+    # Reset the board
+    new_board = engine.create_new_board()
+    new_winner_votes = {key: 0 for key in my_room['board']['winnerVotes'].keys()} # Reset winner votes to 0 for every player
+    new_board['winnerVotes'] = new_winner_votes
+
+    my_room['board'] = new_board
+
+    # Reset players state as needed
+    for i in range(len(my_room['players'])):
+        new_player = engine.create_new_player()
+        new_player['sid'] = my_room['players'][i]['sid']
+        new_player['playerNumber'] = my_room['players'][i]['playerNumber']
+        new_player['remainingChips'] = my_room['players'][i]['remainingChips']
+
+        my_room['players'][i] = new_player
+
+    emit('update_room', to=data['roomId'])
+
+    
+    
+
 
 @socketio.on('list_rooms')
 def show_rooms():

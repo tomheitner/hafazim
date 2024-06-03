@@ -11,13 +11,13 @@ export default function InitScreen({route, navigation}) {
     function handleCreateRoom() {
         const data = {'roomId': roomNum};
         socket.emit('create_room', data);
-        navigation.navigate('Main');
+        navigation.navigate('Main', {roomIdFromNav: roomNum});
     }
 
     function handleJoinRoom() {
         const data = {'roomId': roomNum};
         socket.emit('add_player_to_room', data);
-        navigation.navigate('Main');
+        navigation.navigate('Main', {roomIdFromNav: roomNum});
     }
 
 

@@ -12,7 +12,7 @@ export default function DrawScreen({route, navigation}) {
 
   function finishDrawing() {
     socket.emit('submit_drawing', {'roomId': roomId, 'playerNumber': ataPlayerNumber, 'drawingData': signature});
-    navigation.navigate('Main');
+    navigation.navigate('Main', {});
   }
 
   const {roomId, ataPlayerNumber} = route.params;

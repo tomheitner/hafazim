@@ -13,11 +13,11 @@ import SlideShowModal from '../Components/SlideShowModal';
 export default function MainScreen({ route, navigation }) {
     const [boardState, setBoardState] = useState({});
     const [players, setPlayers] = useState([]);
-    // const [otherPlayers, setOtherPlayers] = useState([]);
-    // const [ataPlayer, setAtaPlayer] = useState({});
     const [ataPlayerNumber, setAtaPlayerNumber] = useState(null);
     const [roomId, setRoomId] = useState(null)
     const [modalOpen, setModalOpen] = useState(false);
+
+    const {roomIdFromNav} = route.params;
 
     // --Server Listeners--
     useEffect(() => {
@@ -26,50 +26,38 @@ export default function MainScreen({ route, navigation }) {
             // parse into state
             setBoardState(data['board'])
             setPlayers(data['players'])
-            setRoomId(data['roomId'])
+            if (ataPlayerNumber === null) setAtaPlayerNumber(data['ataPlayerNumber'])
+            // setRoomId(data['roomId'])
         }
 
-        function onGetPlayerNumber(data) {
-            console.log('--server sent my_player_number with data ', data);
-            setAtaPlayerNumber(data['playerNumber']);
-        }
+        // function onGetPlayerNumber(data) {
+        //     console.log('--server sent my_player_number with data ', data);
+        //     setAtaPlayerNumber(data['playerNumber']);
+        // }
 
         // Set listerners
         socket.on('update_room', onUpdateRoom);
-        socket.on('my_player_number', onGetPlayerNumber);
+        // socket.on('my_player_number', onGetPlayerNumber);
 
 
         // Cancel listeners on shutdown
         return () => {
             socket.off('update_room');
-            socket.off('my_player_number');
+            // socket.off('my_player_number');
         }
     }, [])
 
     // Init
     useEffect(() => {
+        if (roomId === null) {
+            console.log('roomId is null');
+            setRoomId(roomIdFromNav)
+        }
         if (roomId !== null) {
-            console.log('asking server for my playerNumbr with roomId ', roomId);
-            socket.emit('get_player_number', { 'roomId': roomId })
+            console.log('--init: sending update_room to server with roomId:', roomId);
+            socket.emit('get_room', { 'roomId': roomId })
         }
     }, [roomId])
-
-    // useEffect(() => { // when getting the player number seperate ataPlayer and otherPlayers
-    //     if (ataPlayerNumber !== null) {
-    //         // seperate players
-    //         console.log('--all players: ', players);
-    //         const newAtaPlayer = players[ataPlayerNumber];
-    //         const newOtherPlayers = players.filter((item, i) => {
-    //             return item['playerNumber'] !== ataPlayerNumber
-    //         })
-    //         console.log('setting ataPlayer to ', newAtaPlayer);
-    //         console.log('setting otherPlayers to ', newOtherPlayers);
-
-    //         setAtaPlayer(newAtaPlayer);
-    //         setOtherPlayers(newOtherPlayers);
-
-    //     }
-    // }, [players, ataPlayerNumber])
 
 
     // API POST functions
@@ -106,7 +94,7 @@ export default function MainScreen({ route, navigation }) {
                     // return <OtherPlayerSection key={i} player={item} boardState={boardState} />
                 })}
 
-                <View>
+                {/* <View>
                     {ataPlayerNumber !== null ?
                         <Image
                             resizeMode={"contain"}
@@ -114,7 +102,7 @@ export default function MainScreen({ route, navigation }) {
                             source={{ uri: players[ataPlayerNumber]['drawing'] }}
                         />
                         : null}
-                </View>
+                </View> */}
             </View>
 
 
@@ -126,7 +114,7 @@ export default function MainScreen({ route, navigation }) {
 
             <View style={styles.bottomRow}>
                 {ataPlayerNumber !== null ?
-                    players[ataPlayerNumber]['drawing'] !== null &&
+                    // players[ataPlayerNumber]['drawing'] !== null &&
                     <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} />
                     : null
                 }

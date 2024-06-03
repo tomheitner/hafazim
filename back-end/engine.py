@@ -80,6 +80,7 @@ def create_new_board():
             'roundNumber': 0, # the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
             'tableKlafs': [None, None, None, None, None], # [klaf]
             'minBetSize': MIN_STAKE,
+            'winnerVotes': {} # playernumber: votesAmount
         }
     return new_board
 
