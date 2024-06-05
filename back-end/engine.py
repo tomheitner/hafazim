@@ -80,7 +80,7 @@ def create_new_board():
             'roundNumber': 0, # the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
             'tableKlafs': [None, None, None, None, None], # [klaf]
             'minBetSize': MIN_STAKE,
-            'winnerVotes': {} # playernumber: votesAmount
+            'winnerVotes': {} # playernumber: votesAmount; if player has folded winnerVotes for that player number will be None
         }
     return new_board
 
@@ -94,7 +94,8 @@ def create_new_player(player_number, sid):
                 'betSize': 0,
                 'klafs': [ALL_KLAFS[randint(0, 9)], ALL_KLAFS[randint(0, 9)]],
                 'drawing': None,
-                'selectedKlafs': [None, None]
+                'selectedKlafs': [None, None],
+                'isActive': True # Whether this get a turn next time (for example folded players); inactive players can still vote
     }
     return new_player
 

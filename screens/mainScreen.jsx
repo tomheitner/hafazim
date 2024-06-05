@@ -19,21 +19,13 @@ export default function MainScreen({ route, navigation }) {
 
     const {roomIdFromNav} = route.params;
 
+    useEffect(() => {
+        console.log('ataPlayerNumber Changed to ', ataPlayerNumber);
+    }, [ataPlayerNumber])
+
     // --Server Listeners--
     useEffect(() => {
-        function onUpdateRoom(data) {
-            console.log('--server sent update_room with data ', data);
-            // parse into state
-            setBoardState(data['board'])
-            setPlayers(data['players'])
-            if (ataPlayerNumber === null) setAtaPlayerNumber(data['ataPlayerNumber'])
-            // setRoomId(data['roomId'])
-        }
-
-        // function onGetPlayerNumber(data) {
-        //     console.log('--server sent my_player_number with data ', data);
-        //     setAtaPlayerNumber(data['playerNumber']);
-        // }
+        
 
         // Set listerners
         socket.on('update_room', onUpdateRoom);
@@ -59,7 +51,24 @@ export default function MainScreen({ route, navigation }) {
         }
     }, [roomId])
 
-
+    // UTILITY
+    function onUpdateRoom(data) {
+        console.log('--server sent update_room with data ', data);
+        console.log('-- while ataPlayerNumber is ', ataPlayerNumber);
+        // parse into state
+        setBoardState(data['board'])
+        setPlayers(data['players'])
+        if (ataPlayerNumber === null)
+            {
+                console.log('ataPlayerNumber is null: ', ataPlayerNumber);
+                if ('ataPlayerNumber' in data) {
+                    setAtaPlayerNumber(data['ataPlayerNumber'])
+                }
+            }
+        // setRoomId(data['roomId'])
+    }
+    
+    
     // API POST functions
     function changeTurn(betAmount) {
         const input = {
@@ -67,6 +76,15 @@ export default function MainScreen({ route, navigation }) {
             'roomId': roomId
         }
         socket.emit('next_turn', input)
+    }
+
+    function handleFold() {
+        const data = {
+            'roomId': roomId,
+            'playerNumber': ataPlayerNumber,
+        }
+        console.log('sending fold to server with data', data);
+        socket.emit('fold', data)
     }
 
     function finishGame(winner) { // **STILL USES MOCK API**
@@ -93,16 +111,6 @@ export default function MainScreen({ route, navigation }) {
                     if (item['playerNumber'] !== ataPlayerNumber) return <OtherPlayerSection key={i} player={item} boardState={boardState} />
                     // return <OtherPlayerSection key={i} player={item} boardState={boardState} />
                 })}
-
-                {/* <View>
-                    {ataPlayerNumber !== null ?
-                        <Image
-                            resizeMode={"contain"}
-                            style={{ width: 750, height: 100 }}
-                            source={{ uri: players[ataPlayerNumber]['drawing'] }}
-                        />
-                        : null}
-                </View> */}
             </View>
 
 
@@ -114,8 +122,7 @@ export default function MainScreen({ route, navigation }) {
 
             <View style={styles.bottomRow}>
                 {ataPlayerNumber !== null ?
-                    // players[ataPlayerNumber]['drawing'] !== null &&
-                    <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} />
+                    <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} handleFold={handleFold}/>
                     : null
                 }
             </View>

@@ -58,12 +58,22 @@ def next_turn(data):
 
     
     # Calc new turn number (which player)
-    # if my_room['board']['turnNumber'] >= engine.NUM_PLAYERS - 1:
-    if my_room['board']['turnNumber'] >= len(my_room['players']) - 1:
-        my_room['board']['turnNumber'] = 0
+    new_turn_number = player_number + 1 # Set to current turn number + 1
+    while True:
+        # If you just passed the last player go back to player 0
+        if new_turn_number == len(my_room['players']):
+            print('--switching to turn number 0')
+            new_turn_number = 0
+            
+        if my_room['players'][new_turn_number]['isActive']:
+            print('--found active player in number ', new_turn_number)
+            break
+        else:
+            print(f'--inactive player in number {new_turn_number}')
+            new_turn_number += 1
     
-    else:
-        my_room['board']['turnNumber'] += 1
+    my_room['board']['turnNumber'] = new_turn_number
+
 
     # Handle raise
     if my_room['players'][player_number]['betSize'] > my_room['board']['minBetSize']:
@@ -73,6 +83,7 @@ def next_turn(data):
     if (my_room['board']['turnNumber'] == my_room['board']['actionOn']):  # if round changed
         next_round(my_room) 
 
+    print('--sending update_room to everybody--')
     emit('update_room', my_room, to=data['roomId'])
         
     
@@ -117,7 +128,7 @@ def add_player_to_room(data):
     my_room['players'].append(new_player)
     my_room['board']['winnerVotes'][ata_player_number] = 0
 
-    my_room['ata_player_number'] = ata_player_number
+    # my_room['ata_player_number'] = ata_player_number
 
     emit('update_room', my_room, to=data['roomId'])
 
@@ -127,15 +138,20 @@ def add_player_to_room(data):
 
 @socketio.on('get_room')
 def get_room(data):
+    print('--get_room with data: ', data)
     # Data schema: {roomId} 
     
-    room_data = engine.rooms[data['roomId']]
+    my_room = engine.rooms[data['roomId']]
+    output = my_room.copy()
+
 
     # Send player number
-    for player in room_data['players']:
+    for player in my_room['players']:
         if player['sid'] == request.sid:
-            room_data['ataPlayerNumber'] = player['playerNumber']
-    emit('update_room', room_data, to=request.sid)
+            output['ataPlayerNumber'] = player['playerNumber']
+    
+    print('--sending update_room to ', request.sid)
+    emit('update_room', output, to=request.sid)
 
 @socketio.on('get_player_number')
 def get_player_number(data):
@@ -202,7 +218,18 @@ def finish_game(data):
 
     emit('update_room', to=data['roomId'])
 
-    
+@socketio.on('fold')
+def fold(data):
+    # Data schema: {roomId, playerNumber}
+    print('folding player with input ', data)
+
+    my_room = engine.rooms[data['roomId']]
+    my_player = my_room['players'][data['playerNumber']]    
+
+    my_player['isActive'] = False
+    my_room['board']['winnerVotes'][data['playerNumber']] = None
+
+    next_turn({'roomId': data['roomId'], 'betAmount': 0})
     
 
 

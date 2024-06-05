@@ -6,7 +6,7 @@ import { callApi } from '../mock-server/callApi';
 import { useState } from 'react';
 
 
-export default function PlayerSection({ player, boardState, changeTurn }) {
+export default function PlayerSection({ player, boardState, changeTurn, handleFold }) {
 
     const [raiseAmount, setRaiseAmount] = useState(null);
 
@@ -16,6 +16,7 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
     function handleBet(e) {
         setRaiseAmount(Number(e.nativeEvent.text));
     }
+
 
     function handleCall() {
         const betAmount = boardState.minBetSize - player.betSize;
@@ -54,7 +55,7 @@ export default function PlayerSection({ player, boardState, changeTurn }) {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={() => console.log(player)} disabled={disabled}>
+                <TouchableOpacity style={globalStyles.genericButton} onPress={handleFold} disabled={disabled}>
                     <Text>
                         Fold
                     </Text>
