@@ -18,11 +18,50 @@ def handle_connect():
 
 # Server API
 
-def add_all_bets_to_pot(my_room):
-    # Gather bets from every player and add it to pot
-    for player_number in range(len(my_room['players'])):
-        my_room['board']['potSize'] += my_room['players'][player_number]['betSize']  # Update pot size
-        my_room['players'][player_number]['betSize'] = 0
+def add_all_bets_to_pots(my_room):
+    # Sort players by betSize
+    sorted_players = sorted(my_room['players'], key=lambda x: x['betSize']).copy()
+    print('--sorted players: ', sorted_players)
+    my_pots = my_room['board']['pots']
+
+    starting_pot_index = len(my_room['board']['pots']) - 1 # The last pot before checking if more side pots should be added
+    current_pot_index = starting_pot_index
+
+    for player in sorted_players:
+
+        aggragate_pot_bets = 0  # how much of my bet size was given to pots so far
+
+        # Iterate all players to check all-ins
+        for other_player in sorted_players:
+            # Only check player before this one (sorted by betSize)
+            if other_player['playerNumber'] == player['playerNumber']:
+                my_pots[current_pot_index]['size'] += (player['betSize'] - aggragate_pot_bets)  # dump all that's left into this pots
+                print(f'--found myself, Adding ({(player["betSize"] - aggragate_pot_bets)}) to current pot [{current_pot_index}] which is now: ', my_pots[current_pot_index])
+                current_pot_index = starting_pot_index
+
+                break
+
+            # Check if other_player is all-in
+            if other_player['betSize'] < player['betSize']: # other_player is all in
+                print('--found all--')
+                my_pots[current_pot_index]['size'] += (other_player['betSize'] - aggragate_pot_bets)  # add the difference into this pot
+                aggragate_pot_bets = other_player['betSize']  # so far this players has given as much as other player has
+                current_pot_index += 1
+                if current_pot_index >= len(my_pots):
+                    new_pot = {
+                        'size': 0,
+                        'players': [player['playerNumber']]
+
+                    }
+                    my_pots.append(new_pot)
+    
+                my_pots[current_pot_index]['players'].append(player['playerNumber'])  # add myself to the pot's participants
+
+    print('-----------MY POTS: ', my_pots)
+
+    # Reset all bet sizes
+    for player in my_room['players']:
+        player['betSize'] = 0
 
 def next_round(my_room):
     # Calc round number & Open Klafs
@@ -45,7 +84,7 @@ def next_round(my_room):
         my_room['board']['roundNumber'] = 4
 
     # gather bets from eveyone and add to POT
-    add_all_bets_to_pot(my_room)
+    add_all_bets_to_pots(my_room)
     
 
 # Game API
@@ -112,6 +151,7 @@ def create_room(data):
     # Add player to room
     new_player = engine.create_new_player(0, request.sid)
     new_room['players'].append(new_player)
+    new_room['board']['pots'][0]['players'].append(0)
     new_room['board']['winnerVotes'][0] = 0
     join_room(data['roomId'])  # Adds the current sid holder to the room
 
@@ -141,6 +181,7 @@ def add_player_to_room(data):
     new_player = engine.create_new_player(ata_player_number, request.sid)
     my_room['players'].append(new_player)
     my_room['board']['winnerVotes'][ata_player_number] = 0
+    my_room['board']['pots'][0]['players'].append(ata_player_number)
 
     # my_room['ata_player_number'] = ata_player_number
 
@@ -209,8 +250,8 @@ def finish_game(data):
     my_room = engine.rooms[data['roomId']]
 
     # Split the pot between the winners
-    add_all_bets_to_pot(my_room) # Add all remaining bets on the table to the pot
-    pot_per_player = my_room['board']['potSize'] // len(data['winningPlayers']) # Add the relevant amount to each player
+    add_all_bets_to_pots(my_room) # Add all remaining bets on the table to the pot
+    pot_per_player = my_room['board']['potSizes'][-1] // len(data['winningPlayers']) # Add the relevant amount to each player
 
     # Give each player the pot he deserves
     for i in range(len(my_room['players'])):
@@ -248,7 +289,7 @@ def fold(data):
     my_room['board']['winnerVotes'][data['playerNumber']] = None
 
     # Add the player's bet to the pot
-    my_room['board']['potSize'] += my_player['betSize']
+    my_room['board']['potSizes'][-1] += my_player['betSize']
     my_player['betSize'] = 0 
 
     # Check if the game ends

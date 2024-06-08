@@ -13,8 +13,9 @@ export default function OtherPlayerSection({ player, boardState }) {
                 <HefezKlaf moreTextStyles={{ fontSize: 15 }} />
             </View>
 
-            <View style={{ justifyContent: 'center' }}>
+            <View style={{flexDirection: 'row' ,justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text>🪙: {player['remainingChips']}</Text>
+                <Text>Ⓜ️: {player['maxWinnable']}</Text>
             </View>
 
             <View style={styles.bottomRow}>

@@ -17,11 +17,11 @@ export default function TableSection({ navigation, boardState, changeTurn, finis
                 const callAmount = players[boardState.turnNumber].betSize - boardState.minBetSize;
                 const betAmount = getRandomInt(callAmount + 1, callAmount + 100);
                 changeTurn(betAmount);
-            } 
+            }
             else { //call
                 const betAmount = boardState.minBetSize - players[boardState.turnNumber].betSize;
                 changeTurn(betAmount);
-            } 
+            }
         }
     }
     return (
@@ -34,34 +34,36 @@ export default function TableSection({ navigation, boardState, changeTurn, finis
                 <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][3] : null} />
                 <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][4] : null} />
             </View>
-           
+
             <View style={styles.bottomRow}>
 
-            {boardState['roundNumber'] === 4 ?
-                <>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-evenly', gap: 10}}>
-                        <TouchableOpacity onPress={() => setModalOpen(true)}><Text>🥇</Text></TouchableOpacity>
-                    </View>
-                </>
-                :
-                <>
-                    <TouchableOpacity style={globalStyles.genericButton} onPress={() => {navigation.navigate('Drawing', {roomId: roomId, ataPlayerNumber: ataPlayerNumber})}}>
-                        <Text>🎨</Text>
-                    </TouchableOpacity>
+                {boardState['roundNumber'] === 4 ?
+                    <>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', gap: 10 }}>
+                            <TouchableOpacity onPress={() => setModalOpen(true)}><Text>🥇</Text></TouchableOpacity>
+                        </View>
+                    </>
+                    :
+                    <>
+                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => { navigation.navigate('Drawing', { roomId: roomId, ataPlayerNumber: ataPlayerNumber }) }}>
+                            <Text>🎨</Text>
+                        </TouchableOpacity>
 
 
 
-                    <View style={{ justifyContent: 'center' }}>
-                        <Text>Bet Size: {boardState['minBetSize']} $</Text>
-                        <Text>Action On: Player {boardState['actionOn']}</Text>
-                        <Text>Round: {boardState['roundNumber']}</Text>
-                    </View>
-                </>
-            }
+                        <View style={{ justifyContent: 'center' }}>
+                            <Text>Bet Size: {boardState['minBetSize']} $</Text>
+                            <Text>Action On: Player {boardState['actionOn']}</Text>
+                            <Text>Round: {boardState['roundNumber']}</Text>
+                        </View>
+                    </>
+                }
 
 
                 <View style={styles.potContainer}>
-                    <Text>Pot: {boardState['potSize']}$</Text>
+                    {'pots' in boardState ?
+                        <Text>Pot: {boardState['pots'][boardState['pots'].length - 1]['size']}$</Text>
+                        : null}
                 </View>
             </View>
 

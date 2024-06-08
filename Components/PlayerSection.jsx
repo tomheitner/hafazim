@@ -21,7 +21,11 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
 
 
     function handleCall() {
-        const betAmount = boardState.minBetSize - player.betSize;
+        let betAmount = boardState.minBetSize - player.betSize;
+        if (betAmount >= player['remainingChips']) {
+            betAmount = player['remainingChips']
+            console.log('--all in for ', betAmount);
+        }
         changeTurn(betAmount);
     }
 
@@ -29,7 +33,7 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
         raiseAmountNumber = Number(raiseAmount)
         // Check if player has enough chips
 
-        if (player['remainingChips'] > raiseAmountNumber) {
+        if (player['remainingChips'] >= raiseAmountNumber) {
             changeTurn(raiseAmountNumber);
             setRaiseAmount(null);
         }
@@ -44,6 +48,7 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
             <View style={styles.topRow}>
                 <View style={{justifyContent: 'center'}}>
                     <Text>🪙: {player['remainingChips']}</Text>
+                    <Text>Ⓜ️ : {player['maxWinnable']}</Text>
                 </View>
                 
                 <View style={[styles.betContainer, (boardState['actionOn'] === player['playerNumber']) && globalStyles.chosenOutline]}>

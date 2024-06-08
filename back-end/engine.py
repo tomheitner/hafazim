@@ -24,31 +24,6 @@ rooms = {
 
 }
 
-room_schema = {
-    'roomId': str,
-    'board': dict, # Board 
-    'players': list # [Player]
-}
-
-board_schema =  {
-            'potSize': int,
-            'actionOn': int, # which player has the action, when a player raises the action moves to him and only if it goes to the actionOn turn number without a raise you move to the next round
-            'turnNumber': int, # whos turn it is
-            'roundNumber': int, # the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
-            'tableKlafs': list, # [klaf]
-            'minBetSize': int,
-        },
-
-player_schema = {
-    'sid': str,
-    'playerNumber': int,
-    'klafs': list,
-    'remainingChips': int,
-    'drawing': str,
-    'selectedKlafs': list
-
-}
-
 def create_new_room(room_id):
     new_room = {}
     new_room['roomId'] = room_id
@@ -74,7 +49,7 @@ def create_new_room(room_id):
 
 def create_new_board():
     new_board =  {
-            'potSize': 0,
+            'pots': [{'size': 0, 'players': []}],
             'actionOn': 0, # which player has the action, when a player raises the action moves to him and only if it goes to the actionOn turn number without a raise you move to the next round
             'turnNumber': 0, # whos turn it is
             'roundNumber': 0, # the round of the game (0: init, 1: flop, 2: turn, 3: river, 4: finish)
@@ -90,12 +65,14 @@ def create_new_player(player_number, sid):
     new_player = {
                 'sid': sid,
                 'playerNumber': player_number,
-                'remainingChips': STRATING_CHIPS,
+                # 'remainingChips': STRATING_CHIPS,
+                'remainingChips': randint(10, 100),
                 'betSize': 0,
                 'klafs': [ALL_KLAFS[randint(0, 9)], ALL_KLAFS[randint(0, 9)]],
                 'drawing': None,
                 'selectedKlafs': [None, None],
-                'isActive': True # Whether this get a turn next time (for example folded players); inactive players can still vote
+                'isActive': True, # Whether this get a turn next time (for example folded players); inactive players can still vote,
+                'maxWinnable': 0 # The maximum chips a player can win currenctly if he wins the game
     }
     return new_player
 
