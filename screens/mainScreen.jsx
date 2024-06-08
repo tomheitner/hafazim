@@ -83,8 +83,17 @@ export default function MainScreen({ route, navigation }) {
             'roomId': roomId,
             'playerNumber': ataPlayerNumber,
         }
-        console.log('sending fold to server with data', data);
-        socket.emit('fold', data)
+        console.log('calling fold to server with data', data);
+        socket.emit('fold', data);
+    }
+
+    function handleVote(playerNumber) {
+        const data = {
+            'roomId': roomId,
+            'playerNumber': playerNumber
+        }
+        console.log('calling recieve_vote with data ', data);
+        socket.emit('recieve_vote', data)
     }
 
     function finishGame(winner) { // **STILL USES MOCK API**
@@ -104,7 +113,7 @@ export default function MainScreen({ route, navigation }) {
 
     return (
         <View style={[styles.mainContainer]}>
-            <SlideShowModal players={players} modalOpen={modalOpen} setModalOpen={setModalOpen}/>
+            <SlideShowModal players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} modalOpen={modalOpen} setModalOpen={setModalOpen} boardState={boardState}/>
 
             <View style={styles.topRow}>
                 {players.map((item, i) => {
@@ -114,9 +123,8 @@ export default function MainScreen({ route, navigation }) {
             </View>
 
 
-            <View style={styles.midRow}>
-                <TouchableOpacity onPress={() => setModalOpen(true)}><Text>Open</Text></TouchableOpacity>
-                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} navigation={navigation} roomId={roomId} ataPlayerNumber={ataPlayerNumber} />
+            <View style={styles.midRow}>                
+                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} navigation={navigation} roomId={roomId} ataPlayerNumber={ataPlayerNumber} setModalOpen={setModalOpen}/>
                 {/* <Button title='add_chips' onPress={() => socket.emit('list_rooms')} /> */}
             </View>
 

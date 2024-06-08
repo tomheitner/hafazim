@@ -2,13 +2,13 @@ import { Modal, StyleSheet, Text, TouchableHighlight, View } from "react-native"
 import { globalStyles } from "../globalStyles";
 import ImageSlider from "./ImageSlider";
 
-export default function SlideShowModal({ modalOpen, setModalOpen, players }) {
+export default function SlideShowModal({ modalOpen, setModalOpen, players, ataPlayerNumber, handleVote, boardState }) {
 
     return (
         <Modal
             style={styles.modalContainer}
             animationType="slide"
-            transparent={true}
+            transparent={false}
             visible={modalOpen}
             onRequestClose={() => {
                 setModalOpen(!modalOpen);
@@ -18,7 +18,7 @@ export default function SlideShowModal({ modalOpen, setModalOpen, players }) {
                     <Text>Close</Text>
                 </TouchableHighlight>
 
-                <ImageSlider players={players}/>
+                <ImageSlider players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} boardState={boardState}/>
             </View>
         </Modal>
     )

@@ -11,10 +11,12 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
     const [raiseAmount, setRaiseAmount] = useState(null);
 
 
-    disabled = (boardState['turnNumber'] !== player['playerNumber']);
+    const disabled = (boardState['turnNumber'] !== player['playerNumber']); // disable all if this is not the player's turn
+    const raiseDisabled = (raiseAmount === null) || (player['remainingChips'] < raiseAmount) || (raiseAmount < boardState.minBetSize) // disable raise if not enough chips or amount too small
+    const raiseInputColor = raiseDisabled ? 'red' : 'green'
 
-    function handleBet(e) {
-        setRaiseAmount(Number(e.nativeEvent.text));
+    function handleBet(text) {
+        setRaiseAmount(text);
     }
 
 
@@ -24,9 +26,16 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
     }
 
     function handleRaise() {
-        const betAmount = raiseAmount;
-        changeTurn(betAmount);
-        setRaiseAmount(null);
+        raiseAmountNumber = Number(raiseAmount)
+        // Check if player has enough chips
+
+        if (player['remainingChips'] > raiseAmountNumber) {
+            changeTurn(raiseAmountNumber);
+            setRaiseAmount(null);
+        }
+        else {
+            console.log('--not enough chips for raise of ', raiseAmount);
+        }
     }
 
     return (
@@ -61,13 +70,13 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={globalStyles.genericButton} onPress={handleRaise} disabled={disabled || (raiseAmount === null) || (raiseAmount !== null && raiseAmount <= boardState.minBetSize)}>
+                <TouchableOpacity style={[globalStyles.genericButton, ((!disabled && raiseDisabled) && globalStyles.disabled)]} onPress={handleRaise} disabled={disabled || raiseDisabled}>
                     <Text>
                         Raise
                     </Text>
                 </TouchableOpacity>
 
-                <TextInput keyboardType='numeric' placeholder={'min: ' + boardState.minBetSize} style={styles.inputButton} onSubmitEditing={handleBet} editable={!disabled}/>
+                <TextInput keyboardType='numeric' placeholder={'min: ' + boardState.minBetSize} value={raiseAmount} style={[styles.inputButton, (raiseDisabled && styles.inputButtonDisabled)]} onChangeText={text => handleBet(text)} editable={!disabled}/>
             </View>
         </View>
     )
@@ -108,7 +117,10 @@ const styles = StyleSheet.create({
     inputButton: {
         backgroundColor: COLORS.base100,
         width: 100,
-        height: 50
+        height: 50,
+    },
+    inputButtonDisabled: {
+        color: 'red',
     }
 
 });

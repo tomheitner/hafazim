@@ -17,6 +17,13 @@ def handle_connect():
 
 
 # Server API
+
+def add_all_bets_to_pot(my_room):
+    # Gather bets from every player and add it to pot
+    for player_number in range(len(my_room['players'])):
+        my_room['board']['potSize'] += my_room['players'][player_number]['betSize']  # Update pot size
+        my_room['players'][player_number]['betSize'] = 0
+
 def next_round(my_room):
     # Calc round number & Open Klafs
 
@@ -38,17 +45,17 @@ def next_round(my_room):
         my_room['board']['roundNumber'] = 4
 
     # gather bets from eveyone and add to POT
-    for player_number in range(len(my_room['players'])):
-        my_room['board']['potSize'] += my_room['players'][player_number]['betSize']  # Update pot size
-        my_room['players'][player_number]['betSize'] = 0
+    add_all_bets_to_pot(my_room)
     
 
 # Game API
 @socketio.on('next_turn')
 def next_turn(data):
-    # input scheme: {room_id: int, betAmout: int}
+    # input scheme: {room_id: int, betAmout: int, preceedingFold: bool}
 
     print('--next turn on input: ', data)
+
+    # Get relevant room and current last player's playerNumber
     my_room = engine.rooms[data['roomId']]
     player_number = my_room['board']['turnNumber']
 
@@ -57,7 +64,7 @@ def next_turn(data):
     my_room['players'][player_number]['betSize'] += data['betAmount'] 
 
     
-    # Calc new turn number (which player)
+    # Calc new turn number (which player plays next)
     new_turn_number = player_number + 1 # Set to current turn number + 1
     while True:
         # If you just passed the last player go back to player 0
@@ -72,7 +79,14 @@ def next_turn(data):
             print(f'--inactive player in number {new_turn_number}')
             new_turn_number += 1
     
-    my_room['board']['turnNumber'] = new_turn_number
+    # Fold case
+    if 'preceedingFold' in data and data['preceedingFold']:
+        # If the player that just folded had the actionOn, move the actionOn to the preceeding player
+        if my_room['board']['actionOn'] == player_number:
+            my_room['board']['actionOn'] = new_turn_number
+
+
+    my_room['board']['turnNumber'] = new_turn_number # Update turn number
 
 
     # Handle raise
@@ -167,19 +181,20 @@ def get_player_number(data):
 
 @socketio.on('recieve_vote')
 def recieve_vote(data):
-    # data_schema: {roomId, voteFor}
+    # data_schema: {roomId, playerNumber (the player number of the voted for player)}
     print('--recieved vote with data ', data)
     my_room = engine.rooms[data['roomId']]
 
-    my_room['board']['winnerVotes']['voteFor'] += 1
+    my_room['board']['winnerVotes'][data['playerNumber']] += 1
 
     # Check if everyone voted
-    votes_count = sum(my_room['board']['winnerVotes'].values())
+    winner_votes_without_null = [vote for vote in my_room['board']['winnerVotes'].values() if vote is not None]  # Remove null values from list to enable math funcions
+    votes_count = sum(winner_votes_without_null)
     if votes_count >= len(my_room['board']['winnerVotes']):
 
         # Calculate who won
         winner_player_numbers = []
-        votes_to_win = max(my_room['board']['winnerVotes'].values()) # Calculate the amount of votes needed for one or more players to win the game
+        votes_to_win = max(winner_votes_without_null) # Calculate the amount of votes needed for one or more players to win the game
 
         winner_player_numbers = [player['playerNumber'] for player in my_room['players'] if my_room['board']['winnerVotes'][player['playerNumber']] == votes_to_win] # Find the player numbers for players who got the needed amount of votes
 
@@ -192,13 +207,15 @@ def finish_game(data):
     print('--finishing the game with data: ', data)
 
     my_room = engine.rooms[data['roomId']]
-    # Split the pot
-    pot_per_player = my_room['potSize'] // len(data['winningPlayers'])
+
+    # Split the pot between the winners
+    add_all_bets_to_pot(my_room) # Add all remaining bets on the table to the pot
+    pot_per_player = my_room['board']['potSize'] // len(data['winningPlayers']) # Add the relevant amount to each player
 
     # Give each player the pot he deserves
     for i in range(len(my_room['players'])):
         if my_room['players'][i]['playerNumber'] in data['winningPlayers']:
-            my_room['players'][i]['playerNumber']['remainingChips'] += pot_per_player
+            my_room['players'][i]['remainingChips'] += pot_per_player
     
     # Reset the board
     new_board = engine.create_new_board()
@@ -209,14 +226,14 @@ def finish_game(data):
 
     # Reset players state as needed
     for i in range(len(my_room['players'])):
-        new_player = engine.create_new_player()
+        new_player = engine.create_new_player('BULBUL',69)
         new_player['sid'] = my_room['players'][i]['sid']
         new_player['playerNumber'] = my_room['players'][i]['playerNumber']
         new_player['remainingChips'] = my_room['players'][i]['remainingChips']
 
         my_room['players'][i] = new_player
 
-    emit('update_room', to=data['roomId'])
+    emit('update_room', my_room, to=data['roomId'])
 
 @socketio.on('fold')
 def fold(data):
@@ -226,10 +243,22 @@ def fold(data):
     my_room = engine.rooms[data['roomId']]
     my_player = my_room['players'][data['playerNumber']]    
 
+    # Change player state
     my_player['isActive'] = False
     my_room['board']['winnerVotes'][data['playerNumber']] = None
 
-    next_turn({'roomId': data['roomId'], 'betAmount': 0})
+    # Add the player's bet to the pot
+    my_room['board']['potSize'] += my_player['betSize']
+    my_player['betSize'] = 0 
+
+    # Check if the game ends
+    active_players = [player['playerNumber'] for player in my_room['players'] if player['isActive']]
+    print('--active players found: ', active_players)
+    if len(active_players) == 1:
+        print('--only one player active - finishing game--')
+        finish_game({'roomId': data['roomId'], 'winningPlayers': active_players})
+    else: # Game doesn't ene, move to next turn
+        next_turn({'roomId': data['roomId'], 'betAmount': 0, 'preceedingFold': True})
     
 
 

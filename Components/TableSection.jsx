@@ -5,7 +5,7 @@ import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
 
 
-export default function TableSection({ navigation, boardState, changeTurn, finishGame, players, roomId, ataPlayerNumber }) {
+export default function TableSection({ navigation, boardState, changeTurn, finishGame, players, roomId, ataPlayerNumber, setModalOpen }) {
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {
@@ -40,17 +40,7 @@ export default function TableSection({ navigation, boardState, changeTurn, finis
             {boardState['roundNumber'] === 4 ?
                 <>
                     <View style={{flexDirection: 'row', justifyContent: 'space-evenly', gap: 10}}>
-                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(0)}>
-                            <Text>👑0</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(1)}>
-                            <Text>👑1</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => finishGame(2)}>
-                            <Text>👑2</Text>
-                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setModalOpen(true)}><Text>🥇</Text></TouchableOpacity>
                     </View>
                 </>
                 :

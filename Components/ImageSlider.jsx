@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import {
-    View, Image, StyleSheet, SafeAreaView, ScrollView, Dimensions, Text
+    View, Image, StyleSheet, SafeAreaView, ScrollView, Dimensions, Text,
+    TouchableOpacity
 } from 'react-native';
+import { globalStyles } from '../globalStyles';
 
-export default function ImageSlider({players}) {
+export default function ImageSlider({players, ataPlayerNumber, handleVote, boardState}) {
 
     const { width } = Dimensions.get('window');
     const height = width * 0.7;
@@ -28,11 +30,18 @@ export default function ImageSlider({players}) {
                 showsHorizontalScrollIndicator={false}
                 style={{ width, height }}>
                 {players.map((player, index) => (
-                    <Image
-                        key={index}
-                        source={{ uri: player['drawing'] }}
-                        style={{ width, height, resizeMode: 'cover' }}
-                    />
+                    (boardState['winnerVotes'][index] !== null) ?
+                    <View key={index}>
+                        <Image                            
+                            source={{ uri: player['drawing'] }}
+                            style={{ width, height, resizeMode: 'cover' }}
+                        />
+
+                        <TouchableOpacity onPress={() => handleVote(player['playerNumber'])} style={[globalStyles.genericButton, (player['playerNumber'] === ataPlayerNumber && globalStyles.disabled)]} disabled={player['playerNumber'] === ataPlayerNumber}>
+                            <Text>Vote</Text>
+                        </TouchableOpacity>
+                    </View>
+                    : null
                 ))}
             </ScrollView>
             <View style={styles.pagination}>
