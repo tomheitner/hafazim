@@ -33,9 +33,6 @@ def create_new_room(room_id):
 
     # Create 3 new players
     new_players = []
-    # for i in range(3):
-    #     new_player = create_new_player(player_number=i)
-    #     new_players.append(new_player)
     
     new_room['board'] = new_board
     new_room['players'] = new_players
