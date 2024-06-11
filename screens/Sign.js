@@ -1,28 +1,38 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Button, TextInput, TouchableOpacity, Text, ImageBackground } from 'react-native';
 import { globalStyles } from '../globalStyles';
 import SignatureScreen from 'react-native-signature-canvas';
 import { COLORS } from '../consts';
+import ColorPickerModal from '../Components/ColorPickerModal';
 
 
 export default function Sign({ onOK, handleFinish }) {
+
+  const [colorModalOpen, setcolorModalOpen] = useState(false);
+  const [chosenColor, setChosenColor] = useState('purple')
+
   const ref = useRef();
+
+  useEffect(() => {
+    console.log('color to ', chosenColor);
+    ref.current.changePenColor(chosenColor)
+  }, [chosenColor])
+
 
   const handleSignature = signature => {
     console.log(signature);
     onOK(signature);
   };
 
-  const handleClear = () => {
-    ref.current.clearSignature();
+  function onChangeColor(color) {
+    setChosenColor(color);
+    setcolorModalOpen(false);
   }
-
-  const undo = () => {
-    ref.current.undo();
-  };
 
   return (
     <View style={styles.mainContainer}>
+
+      <ColorPickerModal modalOpen={colorModalOpen} setModalOpen={setcolorModalOpen} onChangeColor={onChangeColor}/>
 
       <View style={styles.topRow}>
         <TextInput style={styles.title} defaultValue='Title' />
@@ -39,17 +49,20 @@ export default function Sign({ onOK, handleFinish }) {
           webviewContainerStyle={styles.canvas}
           webStyle={`
                 .m-signature-pad {
-                  background-color: transparent;
-                }
-                .m-signature-pad {
-                  height: 90%;
+                  height: 400px;
                   box-shadow: none;
                   border-radius: 10px;
+                  border-width: 2px;
+                  border-color: black;
+                  border-style: dotted;
+                  background-color: transparent;
                 }
                 .m-signature-pad--footer {
                   display: none;
                 }
+                .m-signature-pad--body {border: none;}
                 `}
+            
         // dataURL={url}
         />
       </View>
@@ -71,11 +84,11 @@ export default function Sign({ onOK, handleFinish }) {
           <Text style={styles.canvasButtonText}>↪️</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.canvasButton} onPress={() => ref.current.changePenColor('rgba(300,50,100,1)')}>
+        <TouchableOpacity style={styles.canvasButton} onPress={() => setcolorModalOpen(true)}>
           <Text style={styles.canvasButtonText}>🎨</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.canvasButton} onPress={() => ref.current.changePenSize(1,10)}>
+        <TouchableOpacity style={styles.canvasButton} onPress={() => ref.current.changePenSize(1, 10)}>
           <Text style={styles.canvasButtonText}>🪬</Text>
         </TouchableOpacity>
 
@@ -132,12 +145,11 @@ const styles = StyleSheet.create({
     fontSize: 35
   },
   canvasContainer: {
-    height: 350
+    height: '60%'
   },
   canvas: {
     backgroundColor: 'transparent',
-    borderColor: 'red',
-    height: 350
+    height: 500
     // backgroundColor: 'transparent'
   }
 });
