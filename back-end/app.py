@@ -123,6 +123,8 @@ def next_round(my_room):
 
     # gather bets from eveyone and add to POT
     add_all_bets_to_pots(my_room)
+
+    
     
 
 # Game API
@@ -139,6 +141,14 @@ def next_turn(data):
     # update player state
     my_room['players'][player_number]['remainingChips'] -= data['betAmount']
     my_room['players'][player_number]['betSize'] += data['betAmount'] 
+
+    # Check if all players are all in and if so move to end of game
+    players_with_chips = 0
+    for player in my_room['players']:
+        if player['remainingChips'] > 0:
+            players_with_chips += 1
+        else:
+            player['isActive'] = False # If the player is all in move it to inactive
 
     
     # Calc new turn number (which player plays next)
@@ -173,6 +183,11 @@ def next_turn(data):
     
     if (my_room['board']['turnNumber'] == my_room['board']['actionOn']):  # if round changed
         next_round(my_room) 
+    
+    # If needed move to sudden death
+    if players_with_chips <= 1:
+        sudden_death(my_room)
+
 
     print('--sending update_room to everybody--')
     emit('update_room', my_room, to=data['roomId'])
@@ -389,6 +404,17 @@ def is_folded(my_room:dict, playerNumber:str) -> bool:
 
     return my_room['board']['winnerVotes'][playerNumber] == None
 
+
+def sudden_death(my_room):
+    # Switch to round 4 - call this after all players are all in
+    my_room['board']['roundNumber'] = 4
+
+    # Open all klafs
+    for i in range(len(my_room['board']['tableKlafs'])):
+        if my_room['board']['tableKlafs'][i] is None:
+            my_room['board']['tableKlafs'][i] = engine.generate_klaf() # Open the kushelaima of the klaf
+
+    # TODO: Round needs to be 3.5 which means all klafs are open but there is no more betting, special condition only for sudden death that waits a bit and then opens for votes
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

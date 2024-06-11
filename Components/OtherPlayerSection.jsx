@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { COLORS } from '../consts';
+import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 
@@ -34,7 +34,10 @@ const styles = StyleSheet.create({
         width: '40%',
         paddingVertical: 10,
         paddingHorizontal: 5,
-        backgroundColor: COLORS.base500,
+
+        backgroundColor: colorOpacity(COLORS.secondary, 0.3),
+        borderWidth: 1,
+        borderColor: COLORS.neutral,
     },
     bottomRow: {
         width: '100%',

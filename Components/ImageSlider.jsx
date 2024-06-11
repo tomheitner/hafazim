@@ -38,7 +38,7 @@ export default function ImageSlider({players, ataPlayerNumber, handleVote, board
                         />
 
                         <TouchableOpacity onPress={() => handleVote(player['playerNumber'])} style={[globalStyles.genericButton, (player['playerNumber'] === ataPlayerNumber && globalStyles.disabled)]} disabled={player['playerNumber'] === ataPlayerNumber}>
-                            <Text>Vote</Text>
+                            <Text style={globalStyles.buttonText}>Vote</Text>
                         </TouchableOpacity>
                     </View>
                     : null

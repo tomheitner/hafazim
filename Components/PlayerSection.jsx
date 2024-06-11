@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
-import { COLORS } from '../consts';
+import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { callApi } from '../mock-server/callApi';
@@ -64,19 +64,19 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
 
             <View style={styles.bottomRow}>
                 <TouchableOpacity style={[globalStyles.genericButton]} onPress={handleCall} disabled={disabled}>
-                    <Text>
+                    <Text style={globalStyles.buttonText}>
                         {boardState['minBetSize'] === 0 ? 'Check' : "Call"}
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={globalStyles.genericButton} onPress={handleFold} disabled={disabled}>
-                    <Text>
+                    <Text style={globalStyles.buttonText}>
                         Fold
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[globalStyles.genericButton, ((!disabled && raiseDisabled) && globalStyles.disabled)]} onPress={handleRaise} disabled={disabled || raiseDisabled}>
-                    <Text>
+                    <Text style={globalStyles.buttonText}>
                         Raise
                     </Text>
                 </TouchableOpacity>
@@ -92,7 +92,11 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        backgroundColor: COLORS.base500,
+        // backgroundColor: COLORS.base500,
+
+        backgroundColor: colorOpacity(COLORS.secondary, 0.3),
+        borderWidth: 1,
+        borderColor: COLORS.neutral,
     },
     topRow: {
         width: '100%',

@@ -15,7 +15,7 @@ export default function SlideShowModal({ modalOpen, setModalOpen, players, ataPl
             }}>
             <View style={styles.mainContainer}>
                 <TouchableHighlight style={globalStyles.genericButton} onPress={() => setModalOpen(false)}>
-                    <Text>Close</Text>
+                    <Text style={globalStyles.buttonText}>Close</Text>
                 </TouchableHighlight>
 
                 <ImageSlider players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} boardState={boardState}/>

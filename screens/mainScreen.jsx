@@ -1,4 +1,4 @@
-import { Button, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../consts';
 import { useEffect, useState } from 'react';
 import TableSection from '../Components/TableSection';
@@ -9,6 +9,8 @@ import OtherPlayerSection from '../Components/OtherPlayerSection';
 import { socket } from '../socketConnector';
 import SlideShowModal from '../Components/SlideShowModal';
 
+import BackGroundImage from '../assets/images/bg.png'
+
 
 export default function MainScreen({ route, navigation }) {
     const [boardState, setBoardState] = useState({});
@@ -17,7 +19,7 @@ export default function MainScreen({ route, navigation }) {
     const [roomId, setRoomId] = useState(null)
     const [modalOpen, setModalOpen] = useState(false);
 
-    const {roomIdFromNav} = route.params;
+    const { roomIdFromNav } = route.params;
 
     useEffect(() => {
         console.log('ataPlayerNumber Changed to ', ataPlayerNumber);
@@ -25,7 +27,7 @@ export default function MainScreen({ route, navigation }) {
 
     // --Server Listeners--
     useEffect(() => {
-        
+
 
         // Set listerners
         socket.on('update_room', onUpdateRoom);
@@ -58,17 +60,16 @@ export default function MainScreen({ route, navigation }) {
         // parse into state
         setBoardState(data['board'])
         setPlayers(data['players'])
-        if (ataPlayerNumber === null)
-            {
-                console.log('ataPlayerNumber is null: ', ataPlayerNumber);
-                if ('ataPlayerNumber' in data) {
-                    setAtaPlayerNumber(data['ataPlayerNumber'])
-                }
+        if (ataPlayerNumber === null) {
+            console.log('ataPlayerNumber is null: ', ataPlayerNumber);
+            if ('ataPlayerNumber' in data) {
+                setAtaPlayerNumber(data['ataPlayerNumber'])
             }
+        }
         // setRoomId(data['roomId'])
     }
-    
-    
+
+
     // API POST functions
     function changeTurn(betAmount) {
         const input = {
@@ -113,27 +114,29 @@ export default function MainScreen({ route, navigation }) {
 
     return (
         <View style={[styles.mainContainer]}>
-            <SlideShowModal players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} modalOpen={modalOpen} setModalOpen={setModalOpen} boardState={boardState}/>
+            <ImageBackground source={BackGroundImage}>
+                <SlideShowModal players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} modalOpen={modalOpen} setModalOpen={setModalOpen} boardState={boardState} />
 
-            <View style={styles.topRow}>
-                {players.map((item, i) => {
-                    if (item['playerNumber'] !== ataPlayerNumber) return <OtherPlayerSection key={i} player={item} boardState={boardState} />
-                    // return <OtherPlayerSection key={i} player={item} boardState={boardState} />
-                })}
-            </View>
+                <View style={styles.topRow}>
+                    {players.map((item, i) => {
+                        if (item['playerNumber'] !== ataPlayerNumber) return <OtherPlayerSection key={i} player={item} boardState={boardState} />
+                        // return <OtherPlayerSection key={i} player={item} boardState={boardState} />
+                    })}
+                </View>
 
 
-            <View style={styles.midRow}>                
-                <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} navigation={navigation} roomId={roomId} ataPlayerNumber={ataPlayerNumber} setModalOpen={setModalOpen}/>
-                {/* <Button title='add_chips' onPress={() => socket.emit('list_rooms')} /> */}
-            </View>
+                <View style={styles.midRow}>
+                    <TableSection boardState={boardState} players={players} changeTurn={changeTurn} finishGame={finishGame} navigation={navigation} roomId={roomId} ataPlayerNumber={ataPlayerNumber} setModalOpen={setModalOpen} />
+                    {/* <Button title='add_chips' onPress={() => socket.emit('list_rooms')} /> */}
+                </View>
 
-            <View style={styles.bottomRow}>
-                {ataPlayerNumber !== null ?
-                    <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} handleFold={handleFold}/>
-                    : null
-                }
-            </View>
+                <View style={styles.bottomRow}>
+                    {ataPlayerNumber !== null ?
+                        <PlayerSection player={players[ataPlayerNumber]} boardState={boardState} changeTurn={changeTurn} handleFold={handleFold} />
+                        : null
+                    }
+                </View>
+            </ImageBackground>
         </View>
     )
 }

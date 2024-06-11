@@ -30,16 +30,16 @@ export default function InitScreen({route, navigation}) {
 
             <View style={styles.buttonsRow}>
             <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
-                <Text>New Room</Text>
+                <Text style={globalStyles.buttonText}>New Room</Text>
             </TouchableHighlight>
 
             <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
-                <Text>Join Room</Text>
+                <Text style={globalStyles.buttonText}>Join Room</Text>
             </TouchableHighlight>
             </View>
 
             <View style={styles.bottomRow}>
-                <TextInput keyboardType="numeric"  onChange={e => handleChange(e)} placeholder="Room#" style={[globalStyles.genericButton, {width: 70, textAlign: 'center'}]}/>
+                <TextInput keyboardType="numeric"  onChange={e => handleChange(e)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, {width: 70, textAlign: 'center'}]}/>
             </View>
         </View>
     )

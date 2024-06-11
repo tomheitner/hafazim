@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
-import { COLORS } from '../consts';
+import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
@@ -46,7 +46,7 @@ export default function TableSection({ navigation, boardState, changeTurn, finis
                     :
                     <>
                         <TouchableOpacity style={globalStyles.genericButton} onPress={() => { navigation.navigate('Drawing', { roomId: roomId, ataPlayerNumber: ataPlayerNumber }) }}>
-                            <Text>🎨</Text>
+                            <Text style={globalStyles.buttonText}>🎨</Text>
                         </TouchableOpacity>
 
 
@@ -77,8 +77,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '75%',
         paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: COLORS.base500,
+        paddingHorizontal: 20,        
+        backgroundColor: colorOpacity(COLORS.secondary, 0.3),
+        borderWidth: 1,
+        borderColor: COLORS.neutral,
         justifyContent: 'space-between',
     },
     bottomRow: {
