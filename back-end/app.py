@@ -108,15 +108,15 @@ def next_round(my_room):
     # handle card opening
     if (my_room['board']['roundNumber'] == 0):
         my_room['board']['roundNumber'] = 1
-        my_room['board']['tableKlafs'] = [engine.generate_klaf(), engine.generate_klaf(), engine.generate_klaf(), None, None]
+        my_room['board']['tableKlafs'] = [engine.generate_klaf(my_room), engine.generate_klaf(my_room), engine.generate_klaf(my_room), None, None]
     
     elif my_room['board']['roundNumber'] == 1: 
         my_room['board']['roundNumber'] = 2
-        my_room['board']['tableKlafs'][3] = engine.generate_klaf()
+        my_room['board']['tableKlafs'][3] = engine.generate_klaf(my_room)
     
     elif my_room['board']['roundNumber'] == 2:
         my_room['board']['roundNumber'] = 3
-        my_room['board']['tableKlafs'][4] = engine.generate_klaf()
+        my_room['board']['tableKlafs'][4] = engine.generate_klaf(my_room)
     
     elif my_room['board']['roundNumber'] == 3: 
         my_room['board']['roundNumber'] = 4
@@ -203,6 +203,7 @@ def create_room(data):
 
     # Add player to room
     new_player = engine.create_new_player(0, request.sid)
+    new_player['klafs'] = [engine.generate_klaf(new_room), engine.generate_klaf(new_room)] # Generate klafs for the player
     new_room['players'].append(new_player)
     new_room['board']['pots'][0]['players'].append(0)
     new_room['board']['winnerVotes'][0] = 0
@@ -232,6 +233,7 @@ def add_player_to_room(data):
     # Create the new player and add to room
     ata_player_number = len(my_room['players'])
     new_player = engine.create_new_player(ata_player_number, request.sid)
+    new_player['klafs'] = [engine.generate_klaf(my_room), engine.generate_klaf(my_room)] # Generate klafs for the player
     my_room['players'].append(new_player)
     my_room['board']['winnerVotes'][ata_player_number] = 0
     my_room['board']['pots'][0]['players'].append(ata_player_number)
@@ -241,6 +243,7 @@ def add_player_to_room(data):
     emit('update_room', my_room, to=data['roomId'])
 
     join_room(data['roomId']) # joins the sid to the room
+    emit('added_player', {'players': my_room['players']}, to=data['roomId'])
     print('--added--')
 
 
@@ -336,6 +339,7 @@ def finish_game(data):
         new_player['sid'] = my_room['players'][i]['sid']
         new_player['playerNumber'] = my_room['players'][i]['playerNumber']
         new_player['remainingChips'] = my_room['players'][i]['remainingChips']
+        new_player['klafs'] = [engine.generate_klaf(my_room), engine.generate_klaf(my_room)]
 
         my_room['players'][i] = new_player
 
@@ -393,8 +397,10 @@ def show_rooms():
 @socketio.on('submit_drawing')
 def submit_drawing(data):
     # Data schema: {roomId, playerNumber, drawingData}
+    print('--user sent submit_drawing with data: ', data)
     my_room = engine.rooms[data['roomId']]
     my_room['players'][data['playerNumber']]['drawing'] = data['drawingData'] # Update drawing for the selected player
+    my_room['players'][data['playerNumber']]['selectedKlafs'] = data['selectedKlafs']
 
     emit('update_room',my_room , to=data['roomId']) # Send update to all players
 
@@ -412,7 +418,7 @@ def sudden_death(my_room):
     # Open all klafs
     for i in range(len(my_room['board']['tableKlafs'])):
         if my_room['board']['tableKlafs'][i] is None:
-            my_room['board']['tableKlafs'][i] = engine.generate_klaf() # Open the kushelaima of the klaf
+            my_room['board']['tableKlafs'][i] = engine.generate_klaf(my_room) # Open the kushelaima of the klaf
 
     # TODO: Round needs to be 3.5 which means all klafs are open but there is no more betting, special condition only for sudden death that waits a bit and then opens for votes
 

@@ -1,45 +1,94 @@
-import { useState } from "react";
-import { TextInput, TouchableHighlight, View, Text, StyleSheet } from "react-native";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { TextInput, TouchableHighlight, View, Text, StyleSheet, Button } from "react-native";
 import { COLORS } from "../consts";
 import { globalStyles } from "../globalStyles";
-import { socket } from "../socketConnector";
+import { socket, changeSocket, IP_ADDRESS } from "../socketConnector";
+import { GameContext } from "../gameContext";
+import { useFocusEffect } from "@react-navigation/native";
 
-export default function InitScreen({route, navigation}) {
-    const [roomNum, setRoomNum] = useState('BLBL')
-    // const {socket} = route.params;
+const ROOM_PLAYERS = 2; // the amount of players needed to open a room
+
+export default function InitScreen({ route, navigation }) {
+    const [roomNum, setRoomNum] = useState('BLBL');
+    const [customIp, setCustomIp] = useState(IP_ADDRESS);
+    const [waitingMode, setWaitingMode] = useState(false) // flag for waiting for players to join room
+    const [playersInRoom, setPlayersInRoom] = useState(1);
+
+    const { setRoomId } = useContext(GameContext);
+
+    // Server listeners
+    useEffect(() => {
+
+        function onUpdateRoom(data) {
+            console.log('--[init] server sent added_player with data: ', data);
+            setPlayersInRoom(data['players'].length)
+
+            if (data['players'].length >= ROOM_PLAYERS) {
+                handleStartGame()
+            }
+        }
+
+        socket.on('added_player', onUpdateRoom)
+
+        return () => {
+            socket.off('added_player')
+        }
+    })
+
+    useFocusEffect(
+        useCallback(() => {
+            setRoomId(null)
+        }, [])
+    )
+
+    function handleStartGame() {
+        navigation.navigate('Main', { roomIdFromNav: roomNum });
+    }
+
 
     function handleCreateRoom() {
-        const data = {'roomId': roomNum};
+        const data = { 'roomId': roomNum };
         socket.emit('create_room', data);
-        navigation.navigate('Main', {roomIdFromNav: roomNum});
+        setWaitingMode(true);
     }
 
     function handleJoinRoom() {
-        const data = {'roomId': roomNum};
+        const data = { 'roomId': roomNum };
         socket.emit('add_player_to_room', data);
-        navigation.navigate('Main', {roomIdFromNav: roomNum});
-    }
-
-
-
-    function handleChange(e) {
-        setRoomNum(Number(e.nativeEvent.text));
+        socket.emit('get_room', data);
+        setWaitingMode(true);
     }
     return (
         <View style={styles.mainContainer}>
+            <View style={{ height: '90%', justifyContent: 'center' }}>
 
-            <View style={styles.buttonsRow}>
-            <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
-                <Text style={globalStyles.buttonText}>New Room</Text>
-            </TouchableHighlight>
 
-            <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
-                <Text style={globalStyles.buttonText}>Join Room</Text>
-            </TouchableHighlight>
+                <View style={styles.buttonsRow}>
+                    <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
+                        <Text style={globalStyles.buttonText}>New Room</Text>
+                    </TouchableHighlight>
+
+                    <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
+                        <Text style={globalStyles.buttonText}>Join Room</Text>
+                    </TouchableHighlight>
+                </View>
+
+                <View style={styles.bottomRow}>
+                    <TextInput keyboardType="numeric" onChangeText={text => setRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center' }]} />
+                </View>
+
+                <View style={styles.statusContainer}>
+                    {waitingMode ?
+                        <Text>{`Waiting for players to join (${playersInRoom} / ${ROOM_PLAYERS})`}</Text>
+                        : null
+                    }
+                </View>
+
             </View>
-
-            <View style={styles.bottomRow}>
-                <TextInput keyboardType="numeric"  onChange={e => handleChange(e)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, {width: 70, textAlign: 'center'}]}/>
+            <View style={styles.footer}>
+                <Text>Server IP: </Text>
+                <TextInput style={{ borderWidth: 1, width: '60%', paddingLeft: 3 }} value={customIp} onChangeText={text => setCustomIp(text)} />
+                <Button title="Change" onPress={() => changeSocket(customIp)} />
             </View>
         </View>
     )
@@ -47,9 +96,8 @@ export default function InitScreen({route, navigation}) {
 
 const styles = StyleSheet.create({
     mainContainer: {
-        flex: 1,
         backgroundColor: COLORS.base300,
-        justifyContent: 'center'
+        // justifyContent: 'center'
     },
     buttonsRow: {
         width: '100%',
@@ -61,5 +109,11 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'center',
         marginTop: 30
+    },
+    footer: {
+        height: '10%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly'
     }
 })

@@ -3,13 +3,16 @@ import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { callApi } from '../mock-server/callApi';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { GameContext } from '../gameContext';
 
 
-export default function PlayerSection({ player, boardState, changeTurn, handleFold }) {
+export default function PlayerSection({ player, changeTurn, handleFold }) {
 
+    
     const [raiseAmount, setRaiseAmount] = useState(null);
-
+    
+    const {boardState} = useContext(GameContext);
 
     const disabled = (boardState['turnNumber'] !== player['playerNumber']); // disable all if this is not the player's turn
     const raiseDisabled = (raiseAmount === null) || (player['remainingChips'] < raiseAmount) || (raiseAmount < boardState.minBetSize) // disable raise if not enough chips or amount too small
@@ -48,7 +51,6 @@ export default function PlayerSection({ player, boardState, changeTurn, handleFo
             <View style={styles.topRow}>
                 <View style={{justifyContent: 'center'}}>
                     <Text>🪙: {player['remainingChips']}</Text>
-                    <Text>Ⓜ️ : {player['maxWinnable']}</Text>
                 </View>
                 
                 <View style={[styles.betContainer, (boardState['actionOn'] === player['playerNumber']) && globalStyles.chosenOutline]}>

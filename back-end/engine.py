@@ -27,6 +27,7 @@ rooms = {
 def create_new_room(room_id):
     new_room = {}
     new_room['roomId'] = room_id
+    new_room['remainingKlafs'] = ALL_KLAFS.copy()
 
     # Create new board
     new_board = create_new_board()
@@ -65,14 +66,19 @@ def create_new_player(player_number, sid):
                 # 'remainingChips': STRATING_CHIPS,
                 'remainingChips': randint(10, 100),
                 'betSize': 0,
-                'klafs': [ALL_KLAFS[randint(0, 9)], ALL_KLAFS[randint(0, 9)]],
-                'drawing': None,
+                'klafs': [],  # When creating new player, generate two klafs and redefine player.klafs
+                'drawing': {'data': '', 'title': '', 'description': ''}, # schema: {data: str, title: str, description: str}
                 'selectedKlafs': [None, None],
-                'isActive': True, # Whether this get a turn next time (for example folded players); inactive players can still vote,
-                'maxWinnable': 0 # The maximum chips a player can win currenctly if he wins the game
+                'isActive': True, # Whether this get a turn next time (for example folded players); inactive players can still vote
     }
     return new_player
 
-def generate_klaf():
-    new_klaf = ALL_KLAFS[randint(0, 9)]
+def generate_klaf(my_room):
+    if (len(my_room['remainingKlafs']) < 1):
+        print('--restocking klafs--')
+        my_room['remainingKlafs'] = ALL_KLAFS.copy()
+
+    klaf_index = randint(0, len(my_room['remainingKlafs']))
+    new_klaf = my_room['remainingKlafs'].pop(klaf_index)
+    print('--generated klaf: ', new_klaf)
     return new_klaf

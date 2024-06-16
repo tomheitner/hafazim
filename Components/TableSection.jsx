@@ -3,9 +3,13 @@ import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
+import { useContext } from 'react';
+import { GameContext } from '../gameContext';
 
 
-export default function TableSection({ navigation, boardState, changeTurn, finishGame, players, roomId, ataPlayerNumber, setModalOpen }) {
+export default function TableSection({ navigation, changeTurn, finishGame, setModalOpen }) {
+
+    const {boardState, players, ataPlayerNumber, roomId} = useContext(GameContext)
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {

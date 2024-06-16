@@ -2,9 +2,12 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
+import { useContext } from 'react';
+import { GameContext } from '../gameContext';
 
 
-export default function OtherPlayerSection({ player, boardState }) {
+export default function OtherPlayerSection({ player }) {
+    const {boardState} = useContext(GameContext)
     return (
         <View style={[styles.mainContainer, (('playerNumber' in player && 'turnNumber' in boardState) && (boardState.turnNumber === player.playerNumber)) && globalStyles.chosenOutline]}>
 
@@ -15,7 +18,6 @@ export default function OtherPlayerSection({ player, boardState }) {
 
             <View style={{flexDirection: 'row' ,justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text>🪙: {player['remainingChips']}</Text>
-                <Text>Ⓜ️: {player['maxWinnable']}</Text>
             </View>
 
             <View style={styles.bottomRow}>

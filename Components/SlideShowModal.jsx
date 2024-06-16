@@ -1,8 +1,12 @@
 import { Modal, StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { globalStyles } from "../globalStyles";
 import ImageSlider from "./ImageSlider";
+import { useContext } from "react";
+import { GameContext } from "../gameContext";
 
-export default function SlideShowModal({ modalOpen, setModalOpen, players, ataPlayerNumber, handleVote, boardState }) {
+export default function SlideShowModal({ modalOpen, setModalOpen, handleVote }) {
+
+    const {boardState, players, ataPlayerNumber} = useContext(GameContext)
 
     return (
         <Modal
@@ -18,7 +22,7 @@ export default function SlideShowModal({ modalOpen, setModalOpen, players, ataPl
                     <Text style={globalStyles.buttonText}>Close</Text>
                 </TouchableHighlight>
 
-                <ImageSlider players={players} ataPlayerNumber={ataPlayerNumber} handleVote={handleVote} boardState={boardState}/>
+                <ImageSlider handleVote={handleVote}/>
             </View>
         </Modal>
     )
