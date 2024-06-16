@@ -78,7 +78,7 @@ def generate_klaf(my_room):
         print('--restocking klafs--')
         my_room['remainingKlafs'] = ALL_KLAFS.copy()
 
-    klaf_index = randint(0, len(my_room['remainingKlafs']))
+    klaf_index = randint(0, len(my_room['remainingKlafs']) - 1)
     new_klaf = my_room['remainingKlafs'].pop(klaf_index)
     print('--generated klaf: ', new_klaf)
     return new_klaf

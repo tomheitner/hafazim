@@ -204,6 +204,7 @@ def create_room(data):
     # Add player to room
     new_player = engine.create_new_player(0, request.sid)
     new_player['klafs'] = [engine.generate_klaf(new_room), engine.generate_klaf(new_room)] # Generate klafs for the player
+    new_player['selectedKlafs'] = [new_player['klafs'][0], new_player['klafs'][1]] # Default selected klafs 
     new_room['players'].append(new_player)
     new_room['board']['pots'][0]['players'].append(0)
     new_room['board']['winnerVotes'][0] = 0
@@ -234,6 +235,7 @@ def add_player_to_room(data):
     ata_player_number = len(my_room['players'])
     new_player = engine.create_new_player(ata_player_number, request.sid)
     new_player['klafs'] = [engine.generate_klaf(my_room), engine.generate_klaf(my_room)] # Generate klafs for the player
+    new_player['selectedKlafs'] = [new_player['klafs'][0], new_player['klafs'][1]] # Default selected klafs 
     my_room['players'].append(new_player)
     my_room['board']['winnerVotes'][ata_player_number] = 0
     my_room['board']['pots'][0]['players'].append(ata_player_number)
@@ -340,6 +342,7 @@ def finish_game(data):
         new_player['playerNumber'] = my_room['players'][i]['playerNumber']
         new_player['remainingChips'] = my_room['players'][i]['remainingChips']
         new_player['klafs'] = [engine.generate_klaf(my_room), engine.generate_klaf(my_room)]
+        new_player['selectedKlafs'] = [new_player['klafs'][0], new_player['klafs'][1]] # Default selected klafs 
 
         my_room['players'][i] = new_player
 

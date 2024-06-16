@@ -1,10 +1,11 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { TextInput, TouchableHighlight, View, Text, StyleSheet, Button } from "react-native";
+import { TextInput, TouchableHighlight, View, Text, StyleSheet, Button, ImageBackground } from "react-native";
 import { COLORS } from "../consts";
 import { globalStyles } from "../globalStyles";
 import { socket, changeSocket, IP_ADDRESS } from "../socketConnector";
 import { GameContext } from "../gameContext";
 import { useFocusEffect } from "@react-navigation/native";
+import BGImage from "../assets/images/bg-canvas.png"
 
 const ROOM_PLAYERS = 2; // the amount of players needed to open a room
 
@@ -58,38 +59,47 @@ export default function InitScreen({ route, navigation }) {
         socket.emit('get_room', data);
         setWaitingMode(true);
     }
+
+    function handleChangeRoomNum(text) {
+        setRoomNum(text);
+        setWaitingMode(false);
+    }
     return (
         <View style={styles.mainContainer}>
-            <View style={{ height: '90%', justifyContent: 'center' }}>
+            <ImageBackground source={BGImage}>
 
 
-                <View style={styles.buttonsRow}>
-                    <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
-                        <Text style={globalStyles.buttonText}>New Room</Text>
-                    </TouchableHighlight>
+                <View style={{ height: '90%', justifyContent: 'center' }}>
 
-                    <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
-                        <Text style={globalStyles.buttonText}>Join Room</Text>
-                    </TouchableHighlight>
+
+                    <View style={styles.buttonsRow}>
+                        <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
+                            <Text style={globalStyles.buttonText}>New Room</Text>
+                        </TouchableHighlight>
+
+                        <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
+                            <Text style={globalStyles.buttonText}>Join Room</Text>
+                        </TouchableHighlight>
+                    </View>
+
+                    <View style={styles.bottomRow}>
+                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center' }]} />
+                    </View>
+
+                    <View style={styles.statusContainer}>
+                        {waitingMode ?
+                            <Text>{`Waiting for players to join (${playersInRoom} / ${ROOM_PLAYERS})`}</Text>
+                            : null
+                        }
+                    </View>
+
                 </View>
-
-                <View style={styles.bottomRow}>
-                    <TextInput keyboardType="numeric" onChangeText={text => setRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center' }]} />
+                <View style={styles.footer}>
+                    <Text>Server IP: </Text>
+                    <TextInput style={{ borderWidth: 1, width: '60%', paddingLeft: 3 }} value={customIp} onChangeText={text => setCustomIp(text)} />
+                    <Button title="Change" onPress={() => changeSocket(customIp)} />
                 </View>
-
-                <View style={styles.statusContainer}>
-                    {waitingMode ?
-                        <Text>{`Waiting for players to join (${playersInRoom} / ${ROOM_PLAYERS})`}</Text>
-                        : null
-                    }
-                </View>
-
-            </View>
-            <View style={styles.footer}>
-                <Text>Server IP: </Text>
-                <TextInput style={{ borderWidth: 1, width: '60%', paddingLeft: 3 }} value={customIp} onChangeText={text => setCustomIp(text)} />
-                <Button title="Change" onPress={() => changeSocket(customIp)} />
-            </View>
+            </ImageBackground>
         </View>
     )
 }
