@@ -14,9 +14,10 @@ export default function PlayerSection({ player, changeTurn, handleFold }) {
     
     const {boardState} = useContext(GameContext);
 
-    const disabled = (boardState['turnNumber'] !== player['playerNumber']); // disable all if this is not the player's turn
+    const disabled = (boardState['turnNumber'] !== player['playerNumber']) || boardState['roundNumber'] === 4 // disable all if this is not the player's turn
     const raiseDisabled = (raiseAmount === null) || (player['remainingChips'] < raiseAmount) || (raiseAmount < boardState.minBetSize) // disable raise if not enough chips or amount too small
     const raiseInputColor = raiseDisabled ? 'red' : 'green'
+
 
     function handleBet(text) {
         setRaiseAmount(text);

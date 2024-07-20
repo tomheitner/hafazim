@@ -70,6 +70,7 @@ def create_new_player(player_number, sid):
                 'drawing': {'data': '', 'title': '', 'description': ''}, # schema: {data: str, title: str, description: str}
                 'selectedKlafs': [None, None],
                 'isActive': True, # Whether this get a turn next time (for example folded players); inactive players can still vote
+                'readyToVote': False # state for when the player has finished making all changes to his drawing, at the end of the game
     }
     return new_player
 

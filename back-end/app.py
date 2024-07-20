@@ -298,6 +298,8 @@ def recieve_vote(data):
         winner_player_numbers = [player['playerNumber'] for player in my_room['players'] if my_room['board']['winnerVotes'][player['playerNumber']] == votes_to_win] # Find the player numbers for players who got the needed amount of votes
 
         finish_game({'roomId': data['roomId']})
+    else: # game is not finished, just someone voted
+        socketio.emit('update_room', my_room, to=data['roomId'])
 
 
 def finish_game(data):
@@ -404,6 +406,10 @@ def submit_drawing(data):
     my_room = engine.rooms[data['roomId']]
     my_room['players'][data['playerNumber']]['drawing'] = data['drawingData'] # Update drawing for the selected player
     my_room['players'][data['playerNumber']]['selectedKlafs'] = data['selectedKlafs']
+
+    # Check if it is the last round of the game, if so, change the player readyToVote to True
+    if my_room['board']['roundNumber'] == 4:
+        my_room['players'][data['playerNumber']]['readyToVote'] = True
 
     emit('update_room',my_room , to=data['roomId']) # Send update to all players
 

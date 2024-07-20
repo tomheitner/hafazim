@@ -1,15 +1,37 @@
-import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Button, Alert } from 'react-native';
 import { COLORS, colorOpacity } from '../consts';
 import HefezKlaf from './HefezKlaf';
 import { globalStyles } from '../globalStyles';
 import { getRandomInt } from '../mock-server/restApi';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { GameContext } from '../gameContext';
 
 
 export default function TableSection({ navigation, changeTurn, finishGame, setModalOpen }) {
 
-    const {boardState, players, ataPlayerNumber, roomId} = useContext(GameContext)
+    const { boardState, players, ataPlayerNumber, roomId } = useContext(GameContext)
+    const [readyToVotePlayers, setReadyToVotePlayers] = useState(0); // count of players that have finished all changed to their drawing and are ready to vote on a winner
+    const [votesSum, setVotesSum] = useState(0); // count of number of votes for a winner
+
+    useEffect(() => {
+        if (players.length > 0) {
+            // Calculate how many players have finished making last changes to their drawing and are ready to vote for a winner
+            const readyPlayersList = players.filter(player => player['readyToVote'] === true);
+            setReadyToVotePlayers(readyPlayersList.length);
+
+            // Calc how many players have voted for a winner already
+            const allVotesSum = Object.values(boardState['winnerVotes']).reduce((a, b) => a + b, 0); // calclate the sum of all votes for all drawings
+            setVotesSum(allVotesSum);
+
+            if (allVotesSum < 1) {
+                // check if all players are ready to vote and jump to gallery
+                if (readyPlayersList.length === players.length) {
+                    setModalOpen(true);
+                }
+            }
+
+        }
+    }, [players])
 
     function handleNextTurn() {
         if (boardState.turnNumber === 0) {
@@ -28,6 +50,13 @@ export default function TableSection({ navigation, changeTurn, finishGame, setMo
             }
         }
     }
+
+    function showAlert() {
+        return Alert.alert('3===D');
+    }
+
+
+    console.log(votesSum);
     return (
         <View style={[styles.mainContainer]} on>
 
@@ -40,35 +69,41 @@ export default function TableSection({ navigation, changeTurn, finishGame, setMo
             </View>
 
             <View style={styles.bottomRow}>
-
-                {boardState['roundNumber'] === 4 ?
+                {ataPlayerNumber !== null && votesSum > 0 ?
                     <>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', gap: 10 }}>
-                            <TouchableOpacity onPress={() => setModalOpen(true)}><Text>🥇</Text></TouchableOpacity>
-                        </View>
+                        <Text>Waiting For Players to finish voting ({votesSum} / {players.length})</Text>
                     </>
                     :
-                    <>
-                        <TouchableOpacity style={globalStyles.genericButton} onPress={() => { navigation.navigate('Drawing', { roomId: roomId, ataPlayerNumber: ataPlayerNumber }) }}>
-                            <Text style={globalStyles.buttonText}>🎨</Text>
-                        </TouchableOpacity>
+                    ataPlayerNumber !== null && players[ataPlayerNumber]['readyToVote'] === true ?
+                        <>
+                            <Text>Waiting For Players to finish drawing ({readyToVotePlayers} / {players.length})</Text>
+                        </>
+                        :
+
+                        <>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                <TouchableOpacity style={globalStyles.genericButton} onPress={() => { navigation.navigate('Drawing', { roomId: roomId, ataPlayerNumber: ataPlayerNumber }) }}>
+                                    <Text style={globalStyles.buttonText}>🎨</Text>
+                                </TouchableOpacity>
+
+                                {boardState['roundNumber'] === 4 &&
+                                    <Text style={styles.finalChanges} >{"   <-- Final changes"}</Text>
+                                }
+
+
+                            </View>
 
 
 
-                        <View style={{ justifyContent: 'center' }}>
-                            <Text>Bet Size: {boardState['minBetSize']} $</Text>
-                            <Text>Action On: Player {boardState['actionOn']}</Text>
-                            <Text>Round: {boardState['roundNumber']}</Text>
-                        </View>
-                    </>
+
+
+                            <View style={styles.potContainer}>
+                                {'pots' in boardState ?
+                                    <Text>Pot: {boardState['pots'][boardState['pots'].length - 1]['size']}$</Text>
+                                    : null}
+                            </View>
+                        </>
                 }
-
-
-                <View style={styles.potContainer}>
-                    {'pots' in boardState ?
-                        <Text>Pot: {boardState['pots'][boardState['pots'].length - 1]['size']}$</Text>
-                        : null}
-                </View>
             </View>
 
 
@@ -81,7 +116,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '75%',
         paddingVertical: 10,
-        paddingHorizontal: 20,        
+        paddingHorizontal: 20,
         backgroundColor: colorOpacity(COLORS.secondary, 0.3),
         borderWidth: 1,
         borderColor: COLORS.neutral,
@@ -109,6 +144,12 @@ const styles = StyleSheet.create({
     klaf: {
         height: '90%',
         width: '17%'
+    },
+    finalChanges: {
+        fontSize: 15,
+        color: COLORS.accent,
+        fontWeight: '700',
+        verticalAlign: 'bottom',
     }
 
 });
