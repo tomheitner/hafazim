@@ -63,8 +63,8 @@ def create_new_player(player_number, sid):
     new_player = {
                 'sid': sid,
                 'playerNumber': player_number,
-                # 'remainingChips': STRATING_CHIPS,
-                'remainingChips': randint(10, 100),
+                'remainingChips': STRATING_CHIPS,
+                # 'remainingChips': randint(10, 100),
                 'betSize': 0,
                 'klafs': [],  # When creating new player, generate two klafs and redefine player.klafs
                 'drawing': {'data': '', 'title': '', 'description': ''}, # schema: {data: str, title: str, description: str}
