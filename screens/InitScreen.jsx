@@ -83,7 +83,7 @@ export default function InitScreen({ route, navigation }) {
                     </View>
 
                     <View style={styles.bottomRow}>
-                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center' }]} />
+                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center', color: 'white' }]} />
                     </View>
 
                     <View style={styles.statusContainer}>
