@@ -7,7 +7,7 @@ import { useContext, useState, useEffect } from 'react';
 import { GameContext } from '../gameContext';
 
 
-export default function TableSection({ navigation, changeTurn, finishGame, setModalOpen }) {
+export default function TableSection({ navigation, changeTurn, setModalOpen }) {
 
     const { boardState, players, ataPlayerNumber, roomId } = useContext(GameContext)
     const [readyToVotePlayers, setReadyToVotePlayers] = useState(0); // count of players that have finished all changed to their drawing and are ready to vote on a winner
@@ -51,10 +51,6 @@ export default function TableSection({ navigation, changeTurn, finishGame, setMo
         }
     }
 
-    function showAlert() {
-        return Alert.alert('3===D');
-    }
-
 
     console.log(votesSum);
     return (
@@ -92,10 +88,6 @@ export default function TableSection({ navigation, changeTurn, finishGame, setMo
 
 
                             </View>
-
-
-
-
 
                             <View style={styles.potContainer}>
                                 {'pots' in boardState ?

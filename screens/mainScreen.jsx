@@ -11,16 +11,14 @@ import SlideShowModal from '../Components/SlideShowModal';
 
 import BackGroundImage from '../assets/images/bg.png'
 import { GameContext } from '../gameContext';
+import PopUpModal from '../Components/PopUpModal';
 
 
 export default function MainScreen({ route, navigation }) {
-    const {boardState, setBoardState, players, setPlayers, ataPlayerNumber, setAtaPlayerNumber, roomId, setRoomId} = useContext(GameContext)
+    const { boardState, setBoardState, players, setPlayers, ataPlayerNumber, setAtaPlayerNumber, roomId, setRoomId } = useContext(GameContext)
 
-    // const [boardState, setBoardState] = useState({});
-    // const [players, setPlayers] = useState([]);
-    // const [ataPlayerNumber, setAtaPlayerNumber] = useState(null);
-    // const [roomId, setRoomId] = useState(null)
     const [modalOpen, setModalOpen] = useState(false);
+    const [winnerPopUpModalOpen, setWinnerPopUpModalOpen] = useState(false);
 
     const { roomIdFromNav } = route.params;
 
@@ -56,20 +54,17 @@ export default function MainScreen({ route, navigation }) {
 
     // UTILITY
     function onUpdateRoom(data) {
-        console.log('**************YOYOYO*************');
         console.log('--server sent update_room with data ', data);
-        console.log('**************YOYOYO*************');
-        console.log('-- while ataPlayerNumber is ', ataPlayerNumber);
         // parse into state
         setBoardState(data['board'])
         setPlayers(data['players'])
+
         if (ataPlayerNumber === null) {
             console.log('ataPlayerNumber is null: ', ataPlayerNumber);
             if ('ataPlayerNumber' in data) {
                 setAtaPlayerNumber(data['ataPlayerNumber'])
             }
         }
-        // setRoomId(data['roomId'])
     }
 
 
@@ -96,7 +91,7 @@ export default function MainScreen({ route, navigation }) {
             'roomId': roomId,
             'playerNumber': playerNumber
         }
-        console.log('calling recieve_vote with data ', data);
+        console.log('--calling recieve_vote with data ', data);
         socket.emit('recieve_vote', data)
     }
 
@@ -114,11 +109,29 @@ export default function MainScreen({ route, navigation }) {
         setPlayers(data.players);
     }
 
+    // other functions
+    function openWinnersPopUp() {
+        setWinnerPopUpModalOpen(true);
+
+        setTimeout(
+            setWinnerPopUpModalOpen(false),
+            3000
+        );
+    }
+
 
     return (
         <View style={[styles.mainContainer]}>
             <ImageBackground source={BackGroundImage}>
                 <SlideShowModal handleVote={handleVote} modalOpen={modalOpen} setModalOpen={setModalOpen} />
+
+                <PopUpModal
+                    modalOpen={winnerPopUpModalOpen}
+                    setModalOpen={setWinnerPopUpModalOpen}
+                    title={'PLAYER has won!'}
+                >
+                    <Text>he got SEVEN votes</Text>
+                </PopUpModal>
 
                 <View style={styles.topRow}>
                     {players.map((item, i) => {
