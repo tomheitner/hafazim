@@ -10,7 +10,7 @@ import BGImage from "../assets/images/bg-canvas.png"
 const ROOM_PLAYERS = 2; // the amount of players needed to open a room (production default is 3)
 
 export default function InitScreen({ route, navigation }) {
-    const [roomNum, setRoomNum] = useState('BLBL');
+    const [roomNum, setRoomNum] = useState('');
     const [customIp, setCustomIp] = useState(IP_ADDRESS);
     const [waitingMode, setWaitingMode] = useState(false) // flag for waiting for players to join room
     const [playersInRoom, setPlayersInRoom] = useState(1);
@@ -73,17 +73,17 @@ export default function InitScreen({ route, navigation }) {
 
 
                     <View style={styles.buttonsRow}>
-                        <TouchableHighlight style={globalStyles.genericButton} onPress={handleCreateRoom}>
+                        <TouchableHighlight style={[globalStyles.genericButton, (roomNum === '' && globalStyles.disabled)]} disabled={roomNum === ''} onPress={handleCreateRoom}>
                             <Text style={globalStyles.buttonText}>New Room</Text>
                         </TouchableHighlight>
 
-                        <TouchableHighlight style={globalStyles.genericButton} onPress={handleJoinRoom}>
+                        <TouchableHighlight style={[globalStyles.genericButton, (roomNum === '' && globalStyles.disabled)]} disabled={roomNum === ''} onPress={handleJoinRoom}>
                             <Text style={globalStyles.buttonText}>Join Room</Text>
                         </TouchableHighlight>
                     </View>
 
                     <View style={styles.bottomRow}>
-                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center', color: 'white' }]} />
+                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, styles.roomNumInput]} />
                     </View>
 
                     <View style={styles.statusContainer}>
@@ -125,5 +125,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly'
+    },
+    roomNumInput: {
+        backgroundColor: 'transparent',
+        minWidth: 70,
+        textAlign: 'center'
     }
 })
