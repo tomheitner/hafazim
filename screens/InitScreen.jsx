@@ -7,7 +7,7 @@ import { GameContext } from "../gameContext";
 import { useFocusEffect } from "@react-navigation/native";
 import BGImage from "../assets/images/bg-canvas.png"
 
-const ROOM_PLAYERS = 2; // the amount of players needed to open a room
+const ROOM_PLAYERS = 2; // the amount of players needed to open a room (production default is 3)
 
 export default function InitScreen({ route, navigation }) {
     const [roomNum, setRoomNum] = useState('BLBL');
@@ -83,7 +83,7 @@ export default function InitScreen({ route, navigation }) {
                     </View>
 
                     <View style={styles.bottomRow}>
-                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center' }]} />
+                        <TextInput keyboardType="numeric" onChangeText={text => handleChangeRoomNum(text)} placeholder="Room#" style={[globalStyles.genericButton, globalStyles.buttonText, { width: 70, textAlign: 'center', color: 'white' }]} />
                     </View>
 
                     <View style={styles.statusContainer}>

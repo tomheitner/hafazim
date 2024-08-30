@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "hafazim",
-    "slug": "hafazim",
+    "slug": "oobjects",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,10 +21,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.tomerdun.oobjects"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b1a91813-728f-41dc-81f9-8decf162d59f"
+      }
+    },
+    "owner": "tomerdun"
   }
 }
