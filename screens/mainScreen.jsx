@@ -5,7 +5,7 @@ import TableSection from '../Components/TableSection';
 import { callApi } from '../mock-server/callApi';
 import PlayerSection from '../Components/PlayerSection';
 import OtherPlayerSection from '../Components/OtherPlayerSection';
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 import { socket } from '../socketConnector';
 import SlideShowModal from '../Components/SlideShowModal';
 
@@ -40,7 +40,6 @@ export default function MainScreen({ route, navigation }) {
         }
     }, [])
 
-    // Init
     useEffect(() => {
         if (roomId === null) {
             console.log('roomId is null');
