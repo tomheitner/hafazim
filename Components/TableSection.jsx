@@ -64,13 +64,17 @@ export default function TableSection({ navigation, changeTurn, setModalOpen }) {
                 <HefezKlaf moreCardStyles={styles.klaf} title={('tableKlafs' in boardState) ? boardState['tableKlafs'][4] : null} />
             </View>
 
+            <Text>ActionOn: {boardState['actionOn']}</Text>
+            <Text>Turn: {boardState['turnNumber']}</Text>
+            <Text>Round: {boardState['roundNumber']}</Text>
+
             <View style={styles.bottomRow}>
                 {ataPlayerNumber !== null && votesSum > 0 ?
                     <>
                         <Text>Waiting For Players to finish voting ({votesSum} / {players.length})</Text>
                     </>
                     :
-                    ataPlayerNumber !== null && players[ataPlayerNumber]['readyToVote'] === true ?
+                    ataPlayerNumber !== null && players[ataPlayerNumber]['readyToVote'] === true && boardState['roundNumber'] >= 4 ?
                         <>
                             <Text>Waiting For Players to finish drawing ({readyToVotePlayers} / {players.length})</Text>
                         </>

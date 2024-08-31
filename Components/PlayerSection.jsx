@@ -52,6 +52,7 @@ export default function PlayerSection({ player, changeTurn, handleFold }) {
             <View style={styles.topRow}>
                 <View style={{justifyContent: 'center'}}>
                     <Text>🪙: {player['remainingChips']}</Text>
+                    <Text>Player {player['playerNumber']}</Text>
                 </View>
                 
                 <View style={[styles.betContainer, (boardState['actionOn'] === player['playerNumber']) && globalStyles.chosenOutline]}>

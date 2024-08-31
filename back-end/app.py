@@ -19,53 +19,62 @@ def handle_connect():
 # Server API
 
 def add_all_bets_to_pots(my_room):
+    """
+    Call this function on the end of round, Generate a list of POTS according to betsizes
+    POTS: {betsize: int, players: [playerNumber]}
+    """
+
+
     # Sort players by betSize
     sorted_players = sorted(my_room['players'], key=lambda x: x['betSize']).copy()
-    print('--sorted players: ', sorted_players)
-    my_pots = my_room['board']['pots']
+    # print('--sorted players (by betSize): ', sorted_players)
+
+    my_pots = my_room['board']['pots'] # current pots list before function
 
     starting_pot_index = len(my_room['board']['pots']) - 1 # The last pot before checking if more side pots should be added
     current_pot_index = starting_pot_index
 
-    for player in sorted_players:
+    for current_player in sorted_players:
 
-        aggragate_pot_bets = 0  # how much of my bet size was given to pots so far
+        aggragate_pot_bets = 0  # how much of current_player bet size was given to pots so far
 
         # Iterate all players to check all-ins
         for other_player in sorted_players:
-            # Only check player before this one (sorted by betSize)
-            if other_player['playerNumber'] == player['playerNumber']:
-                my_pots[current_pot_index]['size'] += (player['betSize'] - aggragate_pot_bets)  # dump all that's left into this pots
+            # Only check player before current_player (sorted by betSize)
+            if other_player['playerNumber'] == current_player['playerNumber']:
+                my_pots[current_pot_index]['size'] += (current_player['betSize'] - aggragate_pot_bets)  # dump all that's left into this pot
 
                 # If the player is folded, remove it from the pot participants
-                if is_folded(my_room, player['playerNumber']):
-                    my_pots[current_pot_index]['players'].remove(player['playerNumber'])
+                if is_folded(my_room, current_player['playerNumber']):
+                    if current_player['playerNumber'] in my_pots[current_pot_index]['players']: # check if the folded player is in the pot player
+                        my_pots[current_pot_index]['players'].remove(current_player['playerNumber'])
 
-                print(f'--found myself, Adding ({(player["betSize"] - aggragate_pot_bets)}) to current pot [{current_pot_index}] which is now: ', my_pots[current_pot_index])
+                print(f'--found current_player ({current_player["playerNumber"]}), Adding ({(current_player["betSize"] - aggragate_pot_bets)}) to current pot [{current_pot_index}] which is now: ', my_pots[current_pot_index])
                 current_pot_index = starting_pot_index
                 break
 
             # Check if other_player is all-in
-            if other_player['betSize'] < player['betSize']: # other_player is all in
-                print('--found all--')
+            if other_player['betSize'] < current_player['betSize'] and not (is_folded(my_room, other_player['playerNumber'])): # other_player is all in
+                print(f'--found all in in player {other_player["playerNumber"]}--')
                 my_pots[current_pot_index]['size'] += (other_player['betSize'] - aggragate_pot_bets)  # add the difference into this pot
 
                 # If the player is folded, remove it from the pot participants
-                if is_folded(my_room, player['playerNumber']):
-                    my_pots[current_pot_index]['players'].remove(player['playerNumber'])
+                if is_folded(my_room, current_player['playerNumber']):
+                    if current_player['playerNumber'] in my_pots[current_pot_index]['players']: # check if the folded player is in the pot player
+                        my_pots[current_pot_index]['players'].remove(current_player['playerNumber'])
 
                 aggragate_pot_bets = other_player['betSize']  # so far this players has given as much as other player has
                 current_pot_index += 1
                 if current_pot_index >= len(my_pots):
                     new_pot = {
                         'size': 0,
-                        'players': [player['playerNumber']]
+                        'players': [current_player['playerNumber']]
 
                     }
                     my_pots.append(new_pot)
     
-                if player['playerNumber'] not in my_pots[current_pot_index]['players']:
-                    my_pots[current_pot_index]['players'].append(player['playerNumber'])  # add myself to the pot's participants
+                if current_player['playerNumber'] not in my_pots[current_pot_index]['players']:
+                    my_pots[current_pot_index]['players'].append(current_player['playerNumber'])  # add myself to the pot's participants
     
 
     # Check all current pots and remove pots with only one participant
@@ -102,6 +111,7 @@ def add_all_bets_to_pots(my_room):
 
 
 def next_round(my_room):
+    print('--function next round--')
     # Calc round number & Open Klafs
 
     my_room['board']['minBetSize'] = 0
@@ -142,13 +152,18 @@ def next_turn(data):
     my_room['players'][player_number]['remainingChips'] -= data['betAmount']
     my_room['players'][player_number]['betSize'] += data['betAmount'] 
 
-    # Check if all players are all in and if so move to end of game
-    players_with_chips = 0
+    # count players data
+    non_folded_players_count = 0
+    active_players_count = 0    
+
     for player in my_room['players']:
-        if player['remainingChips'] > 0:
-            players_with_chips += 1
-        else:
-            player['isActive'] = False # If the player is all in move it to inactive
+        if not is_folded(my_room, player['playerNumber']):
+            non_folded_players_count += 1
+            if player['remainingChips'] > 0:
+                active_players_count += 1                        
+            else:
+                player['isActive'] = False # If the player is all in change it to inactive
+        
 
     
     # Calc new turn number (which player plays next)
@@ -166,26 +181,33 @@ def next_turn(data):
             print(f'--inactive player in number {new_turn_number}')
             new_turn_number += 1
     
-    # Fold case
-    if 'preceedingFold' in data and data['preceedingFold']:
-        # If the player that just folded had the actionOn, move the actionOn to the preceeding player
-        if my_room['board']['actionOn'] == player_number:
+    # -- Fold case --
+    # If the player that just folded had the actionOn, move the actionOn to the preceeding player
+    # this situation will prevent a round change because this can only happen when a player who started the round folded and thus cannot finish a round (בחסד ולא בזכות) [section A]
+    flag_action_on_player_who_just_folded = ('preceedingFold' in data and data['preceedingFold']) and my_room['board']['actionOn'] == player_number
+    if flag_action_on_player_who_just_folded:
             my_room['board']['actionOn'] = new_turn_number
 
 
     my_room['board']['turnNumber'] = new_turn_number # Update turn number
 
 
-    # Handle raise
+    # --Handle raise--
     if my_room['players'][player_number]['betSize'] > my_room['board']['minBetSize']:
         my_room['board']['actionOn'] = player_number # change the actionOn to the player that raised
         my_room['board']['minBetSize'] = my_room['players'][player_number]['betSize'] # update minBetSize to the new bet amount
+
+
+    # -- Move to next round if needed --
+
+    # Check if there is only one player currently active, if so, move to next round    
     
-    if (my_room['board']['turnNumber'] == my_room['board']['actionOn']):  # if round changed
+    if active_players_count < 2 or (my_room['board']['turnNumber'] == my_room['board']['actionOn']) and not flag_action_on_player_who_just_folded:  # if round changed     
+        # to understand the second flag refer to section A   
         next_round(my_room) 
     
     # If needed move to sudden death
-    if players_with_chips <= 1:
+    if active_players_count <= 1 and non_folded_players_count >= 2:
         sudden_death(my_room)
 
 
@@ -379,12 +401,14 @@ def fold_old(data):
 @socketio.on('fold')
 def fold(data):
     # Input Schema: {roomId, playerNumber}
+    print('--fold with data: ', data)
 
-    my_room = engine.rooms[data['roomId']]
+    my_room = engine.rooms[data['roomId']]    
     
     # Change player state
     my_room['board']['winnerVotes'][data['playerNumber']] = None  # This player cannot be voted for
     my_room['players'][data['playerNumber']]['isActive'] = False  # The turn will not be passed to this player
+    my_room['players'][data['playerNumber']]['readyToVote'] = True  # this player will not see final changes for drawing round 4, he will be ready to vote
 
     next_turn({'roomId': data['roomId'], 'betAmount': 0, 'preceedingFold': True})
 
@@ -421,6 +445,7 @@ def is_folded(my_room:dict, playerNumber:str) -> bool:
 
 
 def sudden_death(my_room):
+    print('--sudden death--')
     # Switch to round 4 - call this after all players are all in
     my_room['board']['roundNumber'] = 4
 

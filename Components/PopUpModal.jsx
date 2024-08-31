@@ -1,5 +1,5 @@
 import { Children } from "react";
-import { Modal, StyleSheet, View } from "react-native";
+import { Modal, StyleSheet, View, Text } from "react-native";
 
 export default function PopUpModal({modalOpen, setModalOpen, title}) {
     return (

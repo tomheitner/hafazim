@@ -14,7 +14,7 @@ const { width, height } = Dimensions.get('window');
 
 const ImageSlider = ({ handleVote, setModalOpen }) => {
 
-    const { players, ataPlayerNumber } = useContext(GameContext)
+    const { players, ataPlayerNumber, boardState } = useContext(GameContext)
 
 
     const [active, setActive] = useState(0);
@@ -45,6 +45,7 @@ const ImageSlider = ({ handleVote, setModalOpen }) => {
                     showsHorizontalScrollIndicator={false}
                     style={styles.scrollContainer}>
                     {players && players.map((player, index) => (
+                        boardState['winnerVotes'][player['playerNumber']] !== null &&
                         <View key={index} style={styles.contentContainer}>
 
                             <Text style={styles.title}>
@@ -79,7 +80,8 @@ const ImageSlider = ({ handleVote, setModalOpen }) => {
                 </ScrollView>
 
                 <View style={styles.pagination}>
-                    {players.map((i, k) => (
+                    {players.map((player, k) => (
+                        boardState['winnerVotes'][player['playerNumber']] !== null &&
                         <Text key={k} style={k == active ? styles.activeDot : styles.dot}>
                             •
                         </Text>

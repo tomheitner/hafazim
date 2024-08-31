@@ -18,6 +18,7 @@ export default function OtherPlayerSection({ player }) {
 
             <View style={{flexDirection: 'row' ,justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text>🪙: {player['remainingChips']}</Text>
+                <Text>Player {player['playerNumber']}</Text>
             </View>
 
             <View style={styles.bottomRow}>
