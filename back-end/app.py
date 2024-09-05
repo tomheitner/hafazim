@@ -15,6 +15,10 @@ def index():
 def handle_connect():
     print('--user connected with sid: ', request.sid)
 
+socketio.on('connect_error')
+def connect_error(err):
+    print('connection error: ', err)
+
 
 # Server API
 
@@ -458,3 +462,4 @@ def sudden_death(my_room):
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    # socketio.run(app, host='193.186.4.5', port=5000, debug=True)

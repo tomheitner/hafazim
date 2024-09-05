@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import MainScreen from './screens/mainScreen';
-import DrawScreen from './screens/DrawScreen';
+// import DrawScreen from './screens/DrawScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import InitScreen from './screens/InitScreen';
@@ -25,7 +25,7 @@ export default function App() {
         >
           <Stack.Screen name='Init' component={InitScreen} />
           <Stack.Screen name='Main' component={MainScreen} />
-          <Stack.Screen name='Drawing' component={DrawScreen} />
+          {/* <Stack.Screen name='Drawing' component={DrawScreen} /> */}
         </Stack.Navigator>
       </NavigationContainer>
     </GameContextProvider>

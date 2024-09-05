@@ -71,6 +71,8 @@ export default function InitScreen({ route, navigation }) {
 
                 <View style={{ height: '90%', justifyContent: 'center' }}>
 
+                    {/* <Button title='DRAW' onPress={() => navigation.navigate('Drawing')} /> */}
+
 
                     <View style={styles.buttonsRow}>
                         <TouchableHighlight style={[globalStyles.genericButton, (roomNum === '' && globalStyles.disabled)]} disabled={roomNum === ''} onPress={handleCreateRoom}>
